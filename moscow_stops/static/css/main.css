@@ -1,0 +1,405 @@
+body {
+	padding: 0;
+	margin: 0;
+	overflow:hidden;
+}
+
+html, body, #map {
+	width: 100%;
+	height: 100%;
+}
+
+#userContainer {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	width: 310px;
+	height: 40px;
+	text-align: center;
+	background-color: #ffffff;
+	border: 1px solid #AFAFAF;
+	z-index: 9999;
+}
+
+#userContainer form {
+	margin: 5px;
+}
+
+#userContainer.inner #signInForm {
+	display: none;
+}
+
+#userContainer.inner #signOutForm {
+	display: block;
+}
+
+#userContainer #signOutForm {
+	display: none;
+}
+
+#signOutForm {
+	text-align: left;
+}
+
+#signOutForm label {
+	padding-top: 5px;
+}
+
+#signOutForm button {
+	float: right;
+}
+
+#searchContainer .title,
+#editorContainer .title {
+	height: 32px;
+	background-color: #f5f5f5;
+	line-height: 32px;
+	cursor: pointer;
+}
+
+#searchContainer .title span,
+#editorContainer .title span {
+	margin-left: 10px;
+	font-weight: bold;
+	color: #7f7f7f;
+}
+
+#searchContainer {
+	position: absolute;
+	top: 5px;
+	bottom: 5px;
+	left: 5px;
+	width: 300px;
+	background-color: #ffffff;
+	border: 1px solid #AFAFAF;
+	z-index: 9999;
+}
+
+#searchContainer span.icon-collapse {
+	display: block;
+	width: 6px;
+	height: 15px;
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	cursor: pointer;
+}
+
+#searchContainer span.icon-collapse:hover {
+	background: url('../img/sm-icons.png') -12px -20px;
+}
+
+#searchContainer span.icon-collapse {
+	background: url('../img/sm-icons.png') 0 -20px;
+}
+
+body.searcher-collapsed #searchContainer {
+	width: 32px;
+	height: 32px;
+	background-color: #f5f5f5;
+	border-radius: 4px 4px 4px 4px;
+}
+
+body.searcher-collapsed #searchContainer div.title,
+body.searcher-collapsed #searchContainer form.form-search,
+body.searcher-collapsed #searchContainer #searchResults {
+	display: none;
+}
+
+body.searcher-collapsed #searchContainer span.icon-collapse {
+	width: 25px;
+	height: 25px;
+	right: auto;
+	top: 3px;
+	left: 4px;
+}
+
+body.searcher-collapsed #searchContainer span.icon-collapse {
+	background: url('../img/sm-icons.png') -0px -35px;
+}
+
+body.searcher-collapsed #searchContainer span.icon-collapse:hover {
+	background: url('../img/sm-icons.png') -25px -35px;
+}
+
+body.searcher-collapsed #map .leaflet-control-container .leaflet-top {
+	top: 40px;
+}
+
+body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
+	left: -3px;
+}
+
+#searchContainer .form-search {
+	margin: 5px;
+}
+
+#searchContainer input.input-name {
+	width: 160px;
+}
+
+#searchContainer input.input-id {
+	width: 95px;
+}
+
+#searchResults {
+	margin: 5px;
+	border: 1px solid #AFAFAF;
+	position: absolute;
+	top: 68px;
+	bottom: 5px;
+	left: 5px;
+	right: 5px;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+#searchResults ul {
+	list-style-type: none;
+	margin: 0;
+}
+
+#searchResults ul li {
+	margin-left: 5px;
+	cursor: pointer;
+	color: #676767;
+}
+
+#searchResults ul li:hover {
+	color: #252525;
+}
+
+#editorContainer {
+	right: 5px;position: absolute;
+	top: 50px;
+	bottom: 5px;
+	width: 310px;
+	background-color: #ffffff;
+	border: 1px solid #AFAFAF;
+	z-index: 900;
+}
+
+#editorContainer span.icon-collapse {
+	background: url('../img/sm-icons.png') 0 0;
+}
+
+#editorContainer span.icon-collapse:hover {
+	background: url('../img/sm-icons.png') -20px 0;
+}
+
+#editorContainer span.icon-collapse {
+	display: block;
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	cursor: pointer;
+}
+
+#editorContainer div.form-wrap {
+	bottom: 5px;
+	overflow-x: hidden;
+	overflow-y: auto;
+	position: absolute;
+	top: 34px;
+	right: 3px;
+	left: 0px;
+}
+
+#editorContainer form {
+	margin: 5px 3px 5px 5px;
+}
+
+#editorContainer form div.group {
+	display: table;
+	margin: 0 0 5px 0;
+}
+
+#editorContainer form label,
+#editorContainer form input,
+#editorContainer form select,
+#editorContainer form textarea {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#editorContainer form label.top {
+	vertical-align: top;
+}
+
+#editorContainer form label {
+	width: 90px;
+	line-height: 14px;
+}
+
+#editorContainer form input.stand,
+#editorContainer form textarea {
+	width: 185px;
+}
+
+#editorContainer form select.stand {
+	width: 197px;
+}
+
+#editorContainer form textarea {
+	resize: none;
+}
+
+#pan_link {
+	width: 159px !important;
+}
+
+#editorContainer form div.link {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#pan_link_a {
+	display: block;
+	width: 17px;
+	height: 17px;
+	background: url('../img/sm-icons.png') -17px -125px;
+	margin-left: 5px;
+	cursor: auto;
+}
+
+#pan_link_a.active {
+	background: url('../img/sm-icons.png') 0 -125px;
+	cursor: pointer;
+}
+
+#editorContainer form #save {
+	margin-top: 8px;
+	float: right;
+}
+
+#routes_tagsinput {
+	border: 1px solid #CCCCCC;
+	border-radius: 4px 4px 4px 4px;
+}
+
+#routes_tagsinput #routes_tag:focus {
+	border-color: rgba(82, 168, 236, 0.8);
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+	outline: 0 none;
+}
+
+#routes_addTag input {
+	text-align: center;
+	border: 1px solid #b7d08c;
+	font-size: 20px;
+	font-weight: bold;
+	height: 21px;
+	width: 29px;
+	color: #7B9A3C !important;
+	background-color: #f4ffcb;
+}
+
+#routes_addTag input:hover {
+	color: #587330 !important;
+	background-color: #e6ffb1;
+	border-color: #9db378;
+	cursor: pointer;
+}
+
+body.editor-collapsed #editorContainer {
+	bottom: auto;
+}
+
+body.editor-collapsed #editorContainer span.icon-collapse {
+	background: url('../img/sm-icons.png') -40px 0;
+}
+
+body.editor-collapsed #editorContainer span.icon-collapse:hover {
+	background: url('../img/sm-icons.png') -60px 0;
+}
+
+body.editor-collapsed #editorContainer form {
+	display: none;
+}
+
+body.editor-collapsed #map .leaflet-control-container .leaflet-right {
+	right: 6px;
+}
+
+#map .leaflet-control-container .leaflet-top {
+	top: -6px;
+}
+
+#map .leaflet-control-container .leaflet-left {
+	left: 300px;
+}
+
+#map .leaflet-control-container .leaflet-bottom {
+	bottom: 6px;
+}
+
+#map .leaflet-control-container .leaflet-right {
+	right: 322px;
+}
+
+/*#map-controls div.osm-layer-control {*/
+	/*position: absolute;*/
+	/*top: 53px;*/
+	/*left: 45px;*/
+	/*height: 32px;*/
+	/*width: 32px;*/
+	/*border: 1px solid #AFAFAF;*/
+	/*border-radius: 4px 4px 4px 4px;*/
+	/*background-color: #F5F5F5;*/
+	/*cursor: pointer;*/
+/*}*/
+
+/*#map-controls div.osm-layer-control span {*/
+	/*position: absolute;*/
+	/*height: 28px;*/
+	/*width: 28px;*/
+	/*left: 3px;*/
+	/*top: 3px;*/
+	/*background: url('../img/sm-icons.png') -50px -35px;*/
+/*}*/
+
+/*#map-controls div.osm-layer-control span:hover {*/
+	/*background: url('../img/sm-icons.png') -77px -35px;*/
+/*}*/
+
+/*body.osm #map-controls div.osm-layer-control span {*/
+	/*background: url('../img/sm-icons.png') -77px -35px;*/
+/*}*/
+
+#map .osm-bus-stop {
+	background: url('../img/sm-icons.png') -80px 0;
+}
+
+#map .osmPopup table {
+	border-bottom: solid 1px #a9a9a9;
+	border-top: solid 1px #a9a9a9;
+}
+
+#map .osmPopup .table th,
+#map .osmPopup .table td {
+	padding: 2px;
+}
+
+#map div.osmPopup div.caption {
+	margin-bottom: 5px;
+}
+
+#map div.osmPopup div.caption a,
+#map div.osmPopup div.caption span {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#map div.osmPopup div.caption span {
+	font-size: 14px;
+	text-align: left;
+	padding-right: 5px;
+}
+
+#map .osmPopup a.osm {
+	width: 27px;
+	height: 28px;
+	background: url('../img/sm-icons.png') 0 -98px;
+}
