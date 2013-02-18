@@ -40,7 +40,7 @@
 	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.stops.js')}"></script>
 	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.user.js')}"></script>
 </head>
-<body class="">
+<body class="searcher-collapsed">
 <!--[if lt IE 7]>
 <p class="chromeframe">Вы используете <strong>устаревший</strong> браузер. Пожалуйста <a href="http://browsehappy.com/">обновите
 	ваш браузер</a></p>
