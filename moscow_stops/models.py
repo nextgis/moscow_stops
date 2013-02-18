@@ -57,17 +57,10 @@ class User(Base):
 	def as_dict(self, **addon):
 		return dict(id=self.id, email=self.email, display_name=self.display_name, **addon)
 
-# class StopsRoutes(Base):
-# 	__tablename__ = 'stops_routes'
-#
-# 	stop_id = Column(BigInteger, ForeignKey('stops.id'), nullable=False, primary_key=True)
-# 	route_id = Column(Integer, ForeignKey('routes.id'), nullable=False, primary_key=True)
-
 stopsRoutes = Table('stops_routes', Base.metadata,
                     Column('stop_id', Integer, ForeignKey('stops.id'), nullable=False, primary_key=True),
                     Column('route_id', Integer, ForeignKey('routes.id'), nullable=False, primary_key=True)
 )
-
 
 class Stop(Base):
 	__tablename__ = 'stops'
