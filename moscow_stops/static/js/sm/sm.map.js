@@ -42,7 +42,9 @@
 				$.viewmodel.map.closePopup();
 			});
 			$.viewmodel.map.on('popupclose', function () {
-				$.viewmodel.isPopupOpened = false;
+				var vm = $.viewmodel;
+				vm.isPopupOpened = false;
+				vm.mapLayers.select.clearLayers();
 			});
 		},
 
