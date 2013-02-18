@@ -1,6 +1,6 @@
 (function ($) {
 	$.extend($.viewmodel, {
-		nodesId: {}
+		osmStops: {}
 	});
 	$.extend($.view, {
 
@@ -35,7 +35,10 @@
 
 		updateOsmLayer: function (isCleared) {
 			var validateZoom = this.validateZoom();
-			if (isCleared || !validateZoom) { $.viewmodel.mapLayers.osmStops.clearLayers(); }
+			if (validateZoom) {
+				$.viewmodel.mapLayers.osmStops.clearLayers();
+				$.viewmodel.osmStops = {};
+			}
 			if (!validateZoom) { return; }
 
 			this.updateStopsFromXapi();
@@ -49,34 +52,27 @@
 			this.updateOsmLayer(false);
 		},
 
-		getIcon: function (cssClass, iconSize) {
-			return L.divIcon({
-				className: cssClass,
-				iconSize: [iconSize, iconSize],
-				iconAnchor: [iconSize / 2, iconSize / 2],
-				popupAnchor: [0, 2 - (iconSize / 2)]
-			});
-		},
-
 		renderStops: function (overpassStops) {
 			var stops = overpassStops.elements,
-				osmLayer = $.viewmodel.mapLayers.osmStops,
-				nodesId = $.viewmodel.nodesId,
-				icon = this.getIcon('osm-bus-stop', 22),
-				popupHtml, marker;
+				vm = $.viewmodel,
+				osmLayer = vm.mapLayers.osmStops,
+				icon = $.sm.map.getIcon('osm-bus-stop', 16),
+				marker;
 			for (var i = 0, stopsCount = stops.length; i < stopsCount; i++) {
-				if (nodesId[stops[i].id]) { continue; }
-				popupHtml = $.templates.osmPopupTemplate({
-					tags: $.sm.helpers.hashToArrayKeyValues(stops[i].tags),
-					id: stops[i].id,
-					link: 'http://www.openstreetmap.org/browse/node/' + stops[i].id
-				});
-				marker = L.marker([stops[i].lat, stops[i].lon], {icon:icon})
-					.on('click', function (e) {
-						$.viewmodel.map.panTo(this._latlng);
-						this.openPopup();
-					})
-					.bindPopup(popupHtml);
+				vm.osmStops[stops[i].id] = stops[i];
+				marker = L.marker([stops[i].lat, stops[i].lon], {icon:icon}).on('click', function (e) {
+					$.view.$document.trigger('/sm/map/MarkerClick');
+					var marker = e.target,
+						stop = $.viewmodel.osmStops[marker.id_osm],
+						html = $.templates.osmPopupTemplate({
+							tags: $.sm.helpers.hashToArrayKeyValues(stop.tags),
+							id: stop.id,
+							link: 'http://www.openstreetmap.org/browse/node/' + stop.id
+						});
+						marker.bindPopup(html, {autoPan : false});
+						$.view.$document.trigger('/sm/map/openPopup', [marker]);
+					});
+				marker['id_osm'] = stops[i].id;
 				osmLayer.addLayer(marker);
 			}
 		},

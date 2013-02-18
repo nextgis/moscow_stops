@@ -9,6 +9,10 @@ html, body, #map {
 	height: 100%;
 }
 
+.loader {
+	background: url('../img/loader.gif') center no-repeat;
+}
+
 #userContainer {
 	position: absolute;
 	top: 5px;
@@ -339,6 +343,10 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 	right: 322px;
 }
 
+#map .osm-popup {
+	min-width: 120px;
+}
+
 /*#map-controls div.osm-layer-control {*/
 	/*position: absolute;*/
 	/*top: 53px;*/
@@ -372,33 +380,59 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 	background: url('../img/sm-icons.png') -80px 0;
 }
 
-#map .osmPopup table {
+#map .stop-edit {
+	background: url('../img/sm-icons.png') -0px -145px;
+}
+
+#map .stop-edit:hover {
+	background: url('../img/sm-icons.png') -20px -145px;
+}
+
+#stop-popup.loader {
+	width: 150px;
+	height: 150px;
+}
+#map .leaflet-popup-content{
+	min-width: 150px;
+	width: auto !important;
+}
+
+#stop-popup .table th, #stop-popup .table td {
+	line-height:normal;
+	padding: 4px;
+}
+
+#stop-popup.edit {
+
+}
+
+#map .osm-popup table {
 	border-bottom: solid 1px #a9a9a9;
 	border-top: solid 1px #a9a9a9;
 }
 
-#map .osmPopup .table th,
-#map .osmPopup .table td {
+#map .osm-popup .table th,
+#map .osm-popup .table td {
 	padding: 2px;
 }
 
-#map div.osmPopup div.caption {
+#map div.osm-popup div.caption {
 	margin-bottom: 5px;
 }
 
-#map div.osmPopup div.caption a,
-#map div.osmPopup div.caption span {
+#map div.osm-popup div.caption a,
+#map div.osm-popup div.caption span {
 	display: table-cell;
 	vertical-align: middle;
 }
 
-#map div.osmPopup div.caption span {
+#map div.osm-popup div.caption span {
 	font-size: 14px;
 	text-align: left;
 	padding-right: 5px;
 }
 
-#map .osmPopup a.osm {
+#map .osm-popup a.osm {
 	width: 27px;
 	height: 28px;
 	background: url('../img/sm-icons.png') 0 -98px;

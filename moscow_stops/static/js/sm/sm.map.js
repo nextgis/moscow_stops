@@ -2,11 +2,12 @@
 	$.extend($.viewmodel, {
 		map: null,
 		mapLayers: {},
-		isPopupClosed: true
+		isPopupOpened: false
 	});
 	$.extend($.view, {
-//		$map: null
+
 	});
+
 	$.sm.map = {};
 	$.extend($.sm.map, {
 		init: function () {
@@ -17,28 +18,56 @@
 
 		bindEvents: function () {
 			$.viewmodel.map.on('moveend', function (e) {
-				$.view.$document.trigger('/sm/osm/updateOsmLayer', $.viewmodel.isPopupClosed);
+				$.when($.view.$document.trigger('/sm/osm/updateOsmLayer'),
+					$.view.$document.trigger('/sm/stops/updateStops')).then(function () {
+						var s = $.viewmodel.mapLayers.select._layers,
+							smarker = s[Object.keys(s)[0]];
+						if (smarker && !$.viewmodel.isPopupOpened) {
+							smarker.openPopup();
+							$.viewmodel.isPopupOpened = true;
+							$.view.$document.trigger('/sm/map/openPopupEnd');
+						}
+					});
 			});
-			$.viewmodel.map.on('popupopen', function (e) {
-				$.viewmodel.isPopupClosed = false;
+			$.view.$document.on('/sm/map/openPopup', function (e, markerPopuped) {
+				var vm = $.viewmodel,
+					s = vm.mapLayers.select,
+					m = $.extend(true, {}, markerPopuped);
+				s.clearLayers();
+				s.addLayer(m);
+				vm.map.panTo(markerPopuped._latlng);
 			});
-			$.viewmodel.map.on('popupclose', function (e) {
-				$.viewmodel.isPopupClosed = true;
+			$.view.$document.on('/sm/map/MarkerClick', function (e) {
+				$.viewmodel.mapLayers.select.clearLayers();
+				$.viewmodel.map.closePopup();
+			});
+			$.viewmodel.map.on('popupclose', function () {
+				$.viewmodel.isPopupOpened = false;
 			});
 		},
 
 		setDomOptions: function () {
-//			$.view.$map = $('#map');
+
+		},
+
+		getBbox: function () {
+			return this.map.getBounds();
 		},
 
 		buildMap: function () {
-			$.viewmodel.map = new L.Map('map');
-			var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+			var context = this,
+				osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 				osmAttr = 'Map data © OpenStreetMap contributors',
-				osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 20, attribution: osmAttr});
+				osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 20, attribution: osmAttr}),
+				selectLayer = L.layerGroup();
+			$.viewmodel.map = new L.Map('map');
 			$.viewmodel.map.setView(new L.LatLng(55.742, 37.658), 15);
 			$.viewmodel.map.addLayer(osm);
 			$.viewmodel.mapLayers['osm'] = osm;
+			$.viewmodel.get_bbox = context.getBbox;
+
+			$.viewmodel.map.addLayer(selectLayer);
+			$.viewmodel.mapLayers['select'] = selectLayer;
 		}
 	});
 })(jQuery);

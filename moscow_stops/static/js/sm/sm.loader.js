@@ -13,7 +13,7 @@
 
 	$.sm.loader = {};
 	$.extend($.sm.loader, {
-		templates: ['osmPopupTemplate'],
+		templates: ['osmPopupTemplate', 'stopPopupTemplate', 'stopPopupInfoTemplate'],
 
 		init: function () {
 			try {
@@ -25,6 +25,7 @@
 				$.sm.editor.init();
 				$.sm.osm.init();
 				$.sm.user.init();
+				$.sm.stops.init();
 			} catch (e) {
 				alert(e);
 			}
@@ -45,16 +46,19 @@
 		},
 
 		compileTemplates: function () {
-			var context = this, deferreds = [], htmlTemplates = [], templateIndex,
+			var context = this, deferreds = [], templates = [], htmlTemplates = [], templateIndex,
 				templatesCount = this.templates.length;
 			for (templateIndex = 0; templateIndex < templatesCount; templateIndex++) {
-				deferreds.push($.get('static/js/templates/' + this.templates[templateIndex] + '.htm', function (doc, state, response) {
-					htmlTemplates.push({ 'html' : response.responseText });
+				deferreds.push($.get(document['url_root'] + 'static/js/templates/' + this.templates[templateIndex] + '.htm', function (doc, state, response) {
+					htmlTemplates.push({
+						'name' : this.url.substr((this.url.lastIndexOf("/") + 1)).replace('.htm', ''),
+						'html' : response.responseText });
 				}));
 			}
 			$.when.apply(null, deferreds).done(function () {
 				for (templateIndex = 0; templateIndex < templatesCount; templateIndex++) {
-					$.templates[context.templates[templateIndex]] = Mustache.compile(htmlTemplates[templateIndex].html);
+					var name = htmlTemplates[templateIndex].name;
+					$.templates[name] = Mustache.compile(htmlTemplates[templateIndex].html);
 				}
 			});
 		}
