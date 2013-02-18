@@ -17,7 +17,8 @@ class User(object):
 		email = self.request.POST.get('email', '');
 		password = self.request.POST.get('password', '');
 
-		user = DBSession.query(User) \
+		session = DBSession()
+		user = session.query(User) \
 			.filter_by(email=email, password=password) \
 			.first()
 

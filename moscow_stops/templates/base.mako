@@ -6,7 +6,8 @@
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width">
 
-	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/bootstrap.min.css')}">
+##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/bootstrap.min.css')}">
+	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/build/sm.min.css')}" />
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css"/>
 	<!--[if lte IE 8]>
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css"/>
@@ -16,8 +17,8 @@
 
 	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/MarkerCluster.Default.css')}" />
 	<!--[if lte IE 8]><link rel="stylesheet" href="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/MarkerCluster.Default.ie.css')}" /><![endif]-->
-	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/tagsinput/jquery.tagsinput.css')}">
-	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/main.css')}">
+##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/tagsinput/jquery.tagsinput.css')}">
+##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/main.css')}">
 
 	<script type="text/javascript">
 		document['url_root'] = '${request.route_url('home')}';
@@ -27,18 +28,19 @@
 	<script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
 	<script src="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/leaflet.markercluster-src.js')}"></script>
 
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/tagsinput/jquery.tagsinput.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/mustache.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.loader.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.helpers.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.common.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.helpers.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.searcher.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.editor.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.osm.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.stops.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.user.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/build/sm.min.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/tagsinput/jquery.tagsinput.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/mustache.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.loader.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.helpers.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.common.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.helpers.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.searcher.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.editor.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.osm.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.stops.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.user.js')}"></script>
 </head>
 <body class="searcher-collapsed">
 <!--[if lt IE 7]>
