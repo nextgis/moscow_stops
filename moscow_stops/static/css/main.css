@@ -389,12 +389,11 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 }
 
 #stop-popup.loader {
-	width: 150px;
-	height: 150px;
+	width: 250px;
+	height: 100px;
 }
 #map .leaflet-popup-content{
-	min-width: 150px;
-	width: auto !important;
+	min-width: 250px;
 }
 
 #stop-popup .table th, #stop-popup .table td {
