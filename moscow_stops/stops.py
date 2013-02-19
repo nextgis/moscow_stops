@@ -1,16 +1,7 @@
 # -*- coding: utf-8 -*-
-
-from sqlalchemy.sql import null
-from sqlalchemy.orm import aliased
-from sqlalchemy.orm.exc import NoResultFound
-
-from geoalchemy import *
-from sqlalchemy.orm import *
 from moscow_stops.models import DBSession
-
 from pyramid.view import view_config
 from pyramid.response import Response
-
 from models import Stop
 
 import json
@@ -57,7 +48,12 @@ class Stops(object):
 		stops_result = {'stop': {}}
 		fields = ['id', 'name','is_shelter','is_bench','stop_type_id','is_check']
 		for f in fields:
-			stops_result['stop'][f] = unicode(getattr(stop_from_db[0], f))
+			val = getattr(stop_from_db[0], f)
+			if val == True:
+				val = u'Да'
+			elif val == False:
+				val = u'Нет'
+			stops_result['stop'][f] = unicode(val) if val else ''
 		stops_result['stop']['geom'] = { 'lon' : stop_from_db[1], 'lat' : stop_from_db[2] }
 
 		return Response(json.dumps(stops_result))
@@ -66,7 +62,3 @@ class Stops(object):
 	def post(self):
 		stop = self.request.params.getall('stop')[0]
 		return Response('post')
-	#
-	# @view_config(request_method='DELETE')
-	# def delete(self):
-	# 	return Response('delete')

@@ -11,6 +11,7 @@
 
 	<target name="concatenate-js" depends="init" description="Concatenate all js files">
 		<concat destfile="static/build/sm.js">
+			<file file="static/js/jquery.cookie.js"/>
 			<file file="static/js/tagsinput/jquery.tagsinput.js"/>
 			<file file="static/js/mustache.js"/>
 			<file file="static/js/sm/sm.loader.js"/>

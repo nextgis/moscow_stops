@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 	<meta charset="utf-8">
 	<title>Менеджер станций</title>
@@ -29,6 +29,7 @@
 	<script src="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/leaflet.markercluster-src.js')}"></script>
 
 	<script type="text/javascript" src="${request.static_url('moscow_stops:static/build/sm.min.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/jquery.cookie.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/tagsinput/jquery.tagsinput.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/mustache.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.loader.js')}"></script>
@@ -51,15 +52,23 @@
 <!--<div id="map-controls">-->
 	<!--<div class="osm-layer-control"><span></span></a>-->
 <!--</div>-->
-<div id="userContainer" class="inner">
+<div id="userContainer"
+% if u_name:
+class="inner"
+% endif
+>
 	<form id="signInForm" class="form-inline">
-		<input type="text" class="input-small" placeholder="Логин">
-		<input type="password" class="input-small" placeholder="Пароль">
+		<input id="em" type="email" class="input-small" placeholder="E-mail">
+		<input id="p" type="password" class="input-small" placeholder="Пароль">
 		<button type="button" class="btn btn-primary">Войти</button>
 	</form>
 	<form id="signOutForm" class="form-inline">
 		<fieldset>
-			<label class="control-label">Пользователь</label>
+			<label id="display-name" class="control-label">
+				% if u_name:
+						${u_name}
+				% endif
+			</label>
 			<button type="button" class="btn">Выйти</button>
 		</fieldset>
 	</form>

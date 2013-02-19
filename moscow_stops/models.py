@@ -3,30 +3,18 @@ from sqlalchemy import (
 	Column,
 	ForeignKey,
 	Integer,
-	BigInteger,
 	Boolean,
 	Unicode,
-	Enum,
 	DateTime,
 	Text,
 	Sequence,
-	UniqueConstraint,
-	and_
-	)
-
-from sqlalchemy.sql import (
-	case,
-	select,
+	UniqueConstraint
 	)
 
 from geoalchemy import (
 	GeometryColumn,
-	GeometryDDL,
 	Geometry,
-	WKTSpatialElement,
 	)
-
-import geoalchemy.utils as ga_utils
 
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -48,7 +36,7 @@ class User(Base):
 	id = Column(Integer, primary_key=True)
 	email = Column(Unicode(100), unique=True)
 	password = Column(Unicode(40), nullable=False)
-	display_name = Column(Unicode(100), unique=True)
+	display_name = Column(Unicode(100))
 
 	@classmethod
 	def password_hash(cls, password, salt):
