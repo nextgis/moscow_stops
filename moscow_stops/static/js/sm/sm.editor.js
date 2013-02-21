@@ -1,6 +1,7 @@
 (function ($) {
 	$.extend($.viewmodel, {
-		editorCollapsed: false
+		editorCollapsed: false,
+		editable: false
 	});
 
 	$.extend($.view, {
@@ -14,6 +15,7 @@
 		init: function () {
 			this.setDomOptions();
 			this.buildTags();
+			this.buildEditLayer();
 			this.bindEvents();
 		},
 
@@ -33,6 +35,18 @@
 					pan_link_a.href = '';
 				}
 			});
+			$.view.$document.on('/sm/editor/startEdit', function (e) {
+				context.startEdit();
+
+			});
+			$('#save').off('click').on('click', function (e) {
+				e.stopPropagation();
+				context.save();
+			});
+			$('#discard').off('click').on('click', function (e) {
+				e.stopPropagation();
+				context.discard();
+			});
 		},
 
 		setDomOptions: function () {
@@ -43,8 +57,77 @@
 			$('#routes').tagsInput({
 				'defaultText': '+',
 				'width': '185px',
-				'maxChars' : 5
+				'maxChars' : 5,
+				'interactive' : false
 			});
+		},
+
+		buildEditLayer: function () {
+			var editedLayer = L.layerGroup();
+			$.viewmodel.mapLayers['edit'] = $.viewmodel.map.addLayer(editedLayer);
+		},
+
+		save: function () {
+			this.finishEditing();
+
+		},
+
+		discard: function () {
+			this.finishEditing();
+
+		},
+
+		startEdit: function () {
+			var icon = $.sm.helpers.getIcon('stop-editable', 25),
+				vm = $.viewmodel,
+				v = $.view,
+				marker;
+			v.$body.addClass('editable');
+			v.$editorContainer.find('input, select, textarea, button').removeAttr('disabled');
+			v.$editorContainer.find('form').removeClass('disabled');
+			vm.editable = true;
+			marker = L.marker([vm.stopSelected.geom.lat, vm.stopSelected.geom.lon], {icon: icon, draggable: true});
+			marker.on('dragend', function (e) {
+				var latLon = e.target.getLatLng();
+				$('#lat').val(latLon.lat);
+				$('#lon').val(latLon.lng);
+			});
+			vm.mapLayers['edit'].addLayer(marker);
+			this.fillEditor(vm.stopSelected);
+			vm.map.closePopup();
+		},
+
+		fillEditor: function (stop) {
+			var helpers = $.sm.helpers;
+			$('#name').val(stop.name);
+			$('#id').val(stop.id).attr('disabled', 'disabled');
+			$('#lat').val(stop.geom.lat);
+			$('#lon').val(stop.geom.lon);
+			for (var i = 0, rl = stop.routes.length; i < rl; i +=1) {
+				$('#routes').addTag(stop.routes[i].nm)
+			}
+			for (var i = 0, tl = stop.types.length; i < tl; i +=1) {
+				$('#stype_' + stop.types[i].id).prop('checked', true);
+			}
+			$('#is_shelter').val(stop.is_shelter);
+			$('#is_bench').val(stop.is_bench);
+			// todo add block for TYPES
+			$('#pan_link').val(helpers.valueNullToString(stop.panorama_link));
+			$('#comment').val(helpers.valueNullToString(stop.comment));
+			$('#is_check').val(stop.is_check);
+		},
+
+		finishEditing: function () {
+			var vm = $.viewmodel,
+				v = $.view;
+			vm.mapLayers['edit'].clearLayers();
+			vm.editable = false;
+			v.$body.addClass('editable');
+			v.$editorContainer.find('input, textarea').val('');
+			v.$editorContainer.find('input:checkbox').prop('checked', false);
+			v.$editorContainer.find('input, select, textarea, button').attr('disabled', 'disabled');
+			v.$editorContainer.find('form').addClass('disabled');
+			$('#routes').importTags('');
 		}
 	});
 })(jQuery);

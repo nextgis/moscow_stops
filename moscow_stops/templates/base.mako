@@ -7,8 +7,10 @@
 	<meta name="viewport" content="width=device-width">
 
 ##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/bootstrap.min.css')}">
+##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/tagsinput/jquery.tagsinput.css')}">
+##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/main.css')}">
 	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/build/sm.min.css')}" />
-	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css"/>
+		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css"/>
 	<!--[if lte IE 8]>
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css"/>
 	<![endif]-->
@@ -17,8 +19,6 @@
 
 	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/MarkerCluster.Default.css')}" />
 	<!--[if lte IE 8]><link rel="stylesheet" href="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/MarkerCluster.Default.ie.css')}" /><![endif]-->
-##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/tagsinput/jquery.tagsinput.css')}">
-##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/main.css')}">
 
 	<script type="text/javascript">
 		document['url_root'] = '${request.route_url('home')}';
@@ -107,58 +107,97 @@ class="inner"
 	<span class="icon-collapse"></span>
 	<div class="title"><span>Редактор</span></div>
 	<div class="form-wrap">
-		<form class="form-inline">
+		<form class="form-inline disabled">
 			<div class="group">
 				<label class="control-label middle" for="name">Название</label>
-				<input type="text" id="name" class="stand"/>
+				<input type="text" id="name" class="stand" disabled="disabled"/>
 			</div>
 			<div class="group">
 				<label class="control-label middle" for="id">ID</label>
-				<input type="text" id="id" class="stand"/>
+				<input type="text" id="id" class="stand" disabled="disabled"/>
 			</div>
 			<div class="group">
 				<label class="control-label top" for="routes">Маршруты</label>
-				<input name="tags" id="routes" value="21,58,93,45,66"/>
+				<input name="tags" id="routes" value=""/>
 			</div>
 			<div class="group">
-				<label class="control-label" for="pavilion">Павильон</label>
-				<select id="pavilion" class="stand">
-					<option value="None">Нет</option>
-					<option value="Small">Маленький</option>
-					<option value="Big">Большой</option>
-				</select>
+				<label class="control-label" for="lat">Широта</label>
+				<input type="text" id="lat" class="stand" disabled="disabled"/>
 			</div>
-			<!--<div class="group">-->
-			<!--<label class="control-label" for="kiosk">Киоск</label>-->
-			<!--<input name="tags" id="kiosk"/>-->
-			<!--</div>-->
 			<div class="group">
-				<label class="control-label" for="stop_type">Остановка</label>
-				<select id="stop_type" class="stand">
-					<option value="None">Обычная</option>
-					<option value="Small">Только вход</option>
-					<option value="Big">Только выход</option>
+				<label class="control-label" for="lon">Долгота</label>
+				<input type="text" id="lon" class="stand" disabled="disabled"/>
+			</div>
+			<div class="group">
+				<label class="control-label" for="is_shelter">Крыша</label>
+				<select id="is_shelter" class="stand" disabled="disabled">
+					<option value="None"></option>
+					<option value="True">Да</option>
+					<option value="False">Нет</option>
 				</select>
 			</div>
 			<div class="group">
-				<label class="control-label top" for="comment">Примечание</label>
-				<textarea id="comment"></textarea>
+				<label class="control-label" for="is_bench">Скамейка</label>
+				<select id="is_bench" class="stand" disabled="disabled">
+					<option value="None"></option>
+					<option value="Small">Да</option>
+					<option value="Big">Нет</option>
+				</select>
+			</div>
+			<div class="group">
+				<label class="control-label top">Тип остановки</label>
+				<div class="parameters">
+					<div class="parameter default">
+						<input type="checkbox" id="stype_0" disabled="disabled">
+						<label class="control-label" for="stype_0">Обычная</label>
+					</div>
+					<div class="parameter">
+						<input type="checkbox" id="stype_1" disabled="disabled">
+						<label class="control-label" for="stype_1">Высадка</label>
+					</div>
+					<div class="parameter">
+						<input type="checkbox" id="stype_2" disabled="disabled">
+						<label class="control-label" for="stype_2">Посадка</label>
+					</div>
+					<div class="parameter">
+						<input type="checkbox" id="stype_3" disabled="disabled">
+						<label class="control-label" for="stype_3">Конечная</label>
+					</div>
+				</div>
 			</div>
 			<div class="group">
 				<label class="control-label top" for="pan_link">Ссылка на панораму</label>
-				<input type="text" id="pan_link" class="stand"/>
+				<input type="text" id="pan_link" class="stand" disabled="disabled"/>
 				<div class="link">
 					<a id="pan_link_a" target="_blank"></a>
 				</div>
 			</div>
-			<!--<div class="group">-->
-			<!--<label class="control-label middle" for="check">Проверено</label>-->
-			<!--<input type="checkbox" id="check"/>-->
-			<!--</div>-->
-			<button id="save" type="submit" class="btn">Сохранить</button>
+			<div class="group">
+				<label class="control-label top" for="comment">Комментарий</label>
+				<textarea id="comment" disabled="disabled"></textarea>
+			</div>
+			<div class="group">
+				<label class="control-label" for="is_check">Проверка на местности</label>
+				<select id="is_check" class="stand" disabled="disabled">
+					<option value="0">Не нужна</option>
+					<option value="1">Нужна</option>
+					<option value="2">Проверена</option>
+				</select>
+			</div>
+			<div class="group">
+				<label class="control-label" for="pan_link">Фото</label>
+				<input type="text" id="photo" class="stand" disabled="disabled"/>
+			</div>
+			<div class="group-checkboxes">
+				<input type="checkbox" id="is_help" class="stand" disabled="disabled"/>
+				<label class="control-label top" for="is_help">Нужна помощь</label>
+			</div>
+			<div class="group-submit">
+				<button id="discard" type="button" class="btn btn-warning" disabled="disabled">Отменить</button>
+				<button id="save" type="button" class="btn btn-success" disabled="disabled">Сохранить</button>
+			</div>
 		</form>
 	</div>
-
 </div>
 </body>
 </html>

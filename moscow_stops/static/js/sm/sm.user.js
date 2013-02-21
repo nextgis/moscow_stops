@@ -17,12 +17,10 @@
 		bindEvents: function () {
 			var context = this;
 			$.view.$signInForm.find('button').off('click').on('click', function () {
-				$.viewmodel.isAuth = context.authorize();
-				context.updateUserUI();
+				context.authorize();
 			});
 			$.view.$signOutForm.find('button').off('click').on('click', function () {
 				context.signOut();
-				$.viewmodel.isAuth = false;
 			});
 		},
 
@@ -38,18 +36,23 @@
 		},
 
 		authorize: function () {
+			var context = this;
 			$.post(document['url_root'] + 'user/login', {'em': $('#em').val(), 'p': $('#p').val() }, null, 'json')
 				.done(function (data) {
 					$('#display-name').text(data.name);
+					$.viewmodel.isAuth = true;
+					context.updateUserUI();
 				})
 				.fail( function(xhr, textStatus, errorThrown) {
 					alert(xhr.status);
+					$.viewmodel.isAuth = false;
+					context.updateUserUI();
 				});
-			return true;
 		},
 
 		signOut: function () {
 			var context = this;
+			$.viewmodel.isAuth = false;
 			$.post(document['url_root'] + 'user/logout')
 				.done(function () {
 					context.updateUserUI();

@@ -1,26 +1,41 @@
 <table class="table table-striped">
 	<tr>
-		<td>Id</td>
-		<td>{{#id}}{{id}}{{/id}}</td>
+		<td>Название</td>
+		<td>{{name}}</td>
 	</tr>
 	<tr>
-		<td>Название</td>
-		<td>{{#name}}{{name}}{{/name}}</td>
+		<td>Id</td>
+		<td>{{id}}</td>
+	</tr>
+	<tr>
+		<td>Маршруты</td>
+		<td>{{#routes}} <span>{{nm}}</span> {{/routes}}</td>
 	</tr>
 	<tr>
 		<td>Крыша</td>
-		<td>{{#is_shelter}}{{is_shelter}}{{/is_shelter}}</td>
+		<td>{{is_shelter}}</td>
 	</tr>
 	<tr>
 		<td>Скамейка</td>
-		<td>{{#is_bench}}{{is_bench}}{{/is_bench}}</td>
+		<td>{{is_bench}}</td>
 	</tr>
 	<tr>
-		<td>Тип</td>
-		<td>{{#stop_type_id}}{{stop_type_id}}{{/stop_type_id}}</td>
+		<td>Тип остановки</td>
+		<td>{{#types}}<p>{{name}}</p>{{/types}}</td>
 	</tr>
 	<tr>
-		<td>Проверена</td>
-		<td>{{#is_check}}{{is_check}}{{/is_check}}</td>
+		<td>Проверка на местности</td>
+		<td>{{is_check}}</td>
+	</tr>
+	<tr>
+		<td>Комментарий</td>
+		<td>{{comment}}</td>
 	</tr>
 </table>
+{{#isUserEditor}}
+<div class="edit">
+	<button class="btn btn-small btn-primary" id="edit" type="button" {{#editDenied}}disabled="disabled"{{/editDenied}}>Редактировать</button>
+	<!--<a class="{{#editable}}allow{{/editable}}"></a>-->
+</div>
+{{/isUserEditor}}
+

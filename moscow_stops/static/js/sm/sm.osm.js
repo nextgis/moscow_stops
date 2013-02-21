@@ -21,6 +21,9 @@
 			$.view.$document.on('/sm/osm/updateOsmLayer', function (e, isCleared) {
 				context.updateOsmLayer(isCleared);
 			});
+			$.viewmodel.map.on('zoomend', function (e) {
+				$.view.$document.trigger('/sm/osm/updateOsmLayer');
+			});
 		},
 
 		setDomOptions: function () {
@@ -33,12 +36,9 @@
 			$.viewmodel.mapLayers['osmStops'] = osmStopsLayerGroup;
 		},
 
-		updateOsmLayer: function (isCleared) {
+		updateOsmLayer: function () {
 			var validateZoom = this.validateZoom();
-			if (validateZoom) {
-				$.viewmodel.mapLayers.osmStops.clearLayers();
-				$.viewmodel.osmStops = {};
-			}
+			$.viewmodel.mapLayers.osmStops.clearLayers();
 			if (!validateZoom) { return; }
 
 			this.updateStopsFromXapi();
@@ -90,10 +90,12 @@
 		},
 
 		getApiUrl: function (boundingbox) {
-			var overpassUrl = "http://overpass-api.de/api/interpreter?data=[out:json];(node[highway=bus_stop]("
-				+ boundingbox.getSouthWest().lat + "," + boundingbox.getSouthWest().lng
-				+ "," + boundingbox.getNorthEast().lat
-				+ "," + boundingbox.getNorthEast().lng
+			var sw = boundingbox.getSouthWest(),
+				ne = boundingbox.getNorthEast(),
+				overpassUrl = "http://overpass-api.de/api/interpreter?data=[out:json];(node[highway=bus_stop]("
+				+ sw.lat + "," + sw.lng
+				+ "," + ne.lat
+				+ "," + ne.lng
 				+ ");>;);out;";
 			return overpassUrl;
 		},

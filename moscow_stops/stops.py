@@ -46,15 +46,33 @@ class Stops(object):
 		stop_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).filter(Stop.id == id).one()
 
 		stops_result = {'stop': {}}
-		fields = ['id', 'name','is_shelter','is_bench','stop_type_id','is_check']
+		fields = ['id', 'name','is_shelter','is_bench','stop_type_id','is_check', 'panorama_link', 'comment']
 		for f in fields:
-			val = getattr(stop_from_db[0], f)
-			if val == True:
-				val = u'Да'
-			elif val == False:
-				val = u'Нет'
-			stops_result['stop'][f] = unicode(val) if val else ''
+			if hasattr(stop_from_db[0], f):
+				stops_result['stop'][f] = unicode(getattr(stop_from_db[0], f))
 		stops_result['stop']['geom'] = { 'lon' : stop_from_db[1], 'lat' : stop_from_db[2] }
+
+		sql = 'SELECT routes.id, routes.name, routes.route_type_id FROM stops_routes ' \
+		      'JOIN routes ' \
+		      'ON (stops_routes.route_id = routes.id) ' \
+		      'WHERE stops_routes.stop_id = :stop_id ' \
+		      'ORDER BY routes.route_type_id, routes.name'
+		routes_from_db = session.execute(sql, {'stop_id' : id})
+		routes = []
+		for route in routes_from_db:
+			routes.append({'id' : route[0], 'nm' : route[1], 't' : route[2]})
+		stops_result['stop']['routes'] = routes
+
+		sql = 'SELECT stop_types.id, stop_types.name FROM stops_stop_types ' \
+		      'JOIN stop_types ' \
+		      'ON (stops_stop_types.stop_type_id = stop_types.id) ' \
+		      'WHERE stops_stop_types.stop_id = :stop_id ' \
+		      'ORDER BY stop_types.name;'
+		stop_types_from_db = session.execute(sql, {'stop_id' : id})
+		stop_types = []
+		for stop_type in stop_types_from_db:
+			stop_types.append({'id' : stop_type[0], 'nm' : stop_type[1]})
+		stops_result['stop']['types'] = stop_types
 
 		return Response(json.dumps(stops_result))
 

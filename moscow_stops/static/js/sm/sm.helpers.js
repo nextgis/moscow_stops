@@ -20,6 +20,26 @@
 				res.push({ 'key' : prop, 'val' : hash[prop]});
 			}
 			return res;
+		},
+
+		boolToString: function (bool) {
+			switch (bool) {
+				case 'None':
+					return '';
+					break;
+				case 'True':
+					return 'Да'
+					break;
+				case 'False':
+					return 'Нет'
+					break;
+			}
+			throw 'The bool value is not convertible to string'
+		},
+
+		valueNullToString: function (val) {
+			if (val === 'None') { return ''; }
+			return val;
 		}
 	});
 })(jQuery);

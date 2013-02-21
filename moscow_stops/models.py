@@ -50,6 +50,11 @@ stopsRoutes = Table('stops_routes', Base.metadata,
                     Column('route_id', Integer, ForeignKey('routes.id'), nullable=False, primary_key=True)
 )
 
+stopsStopType = Table('stops_stop_types', Base.metadata,
+                    Column('stop_id', Integer, ForeignKey('stops.id'), nullable=False, primary_key=True),
+                    Column('stop_type_id', Integer, ForeignKey('stop_types.id'), nullable=False, primary_key=True)
+)
+
 class Stop(Base):
 	__tablename__ = 'stops'
 
@@ -58,11 +63,11 @@ class Stop(Base):
 	name = Column(Unicode(254), index=True, nullable=False)
 	is_bench = Column(Boolean, nullable=True)
 	is_shelter = Column(Boolean, nullable=True)
-	stop_type = relationship('StopType')
-	stop_type_id = Column(Integer, ForeignKey('stop_types.id'), nullable=True)
-	description = Text()
+	stop_type = relationship('StopType', secondary=stopsStopType, backref='stops')
+	# stop_type_id = Column(Integer, ForeignKey('stop_types.id'), nullable=True)
+	comment = Column(Text, nullable=True)
 	panorama_link = Column(Unicode(500))
-	is_check = Column(Boolean, nullable=True)
+	is_check = Column(Integer, nullable=True, default=0)
 	routes = relationship("Route", secondary=stopsRoutes, backref='stops')
 	is_block = Column(Boolean, nullable=True)
 	user_block = relationship('User')

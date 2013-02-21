@@ -60,7 +60,7 @@
 			var context = this,
 				osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 				osmAttr = 'Map data © OpenStreetMap contributors',
-				osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 20, attribution: osmAttr}),
+				osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 18, attribution: osmAttr}),
 				selectLayer = L.layerGroup();
 			$.viewmodel.map = new L.Map('map');
 			$.viewmodel.map.setView(new L.LatLng(55.742, 37.658), 15);

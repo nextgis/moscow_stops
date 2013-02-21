@@ -1070,6 +1070,26 @@
 				res.push({ 'key' : prop, 'val' : hash[prop]});
 			}
 			return res;
+		},
+
+		boolToString: function (bool) {
+			switch (bool) {
+				case 'None':
+					return '';
+					break;
+				case 'True':
+					return 'Да'
+					break;
+				case 'False':
+					return 'Нет'
+					break;
+			}
+			throw 'The bool value is not convertible to string'
+		},
+
+		valueNullToString: function (val) {
+			if (val === 'None') { return ''; }
+			return val;
 		}
 	});
 })(jQuery);(function ($) {
@@ -1166,7 +1186,7 @@
 			var context = this,
 				osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 				osmAttr = 'Map data © OpenStreetMap contributors',
-				osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 20, attribution: osmAttr}),
+				osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 18, attribution: osmAttr}),
 				selectLayer = L.layerGroup();
 			$.viewmodel.map = new L.Map('map');
 			$.viewmodel.map.setView(new L.LatLng(55.742, 37.658), 15);
@@ -1225,7 +1245,8 @@
 
 (function ($) {
 	$.extend($.viewmodel, {
-		editorCollapsed: false
+		editorCollapsed: false,
+		editable: false
 	});
 
 	$.extend($.view, {
@@ -1239,6 +1260,7 @@
 		init: function () {
 			this.setDomOptions();
 			this.buildTags();
+			this.buildEditLayer();
 			this.bindEvents();
 		},
 
@@ -1258,6 +1280,18 @@
 					pan_link_a.href = '';
 				}
 			});
+			$.view.$document.on('/sm/editor/startEdit', function (e) {
+				context.startEdit();
+
+			});
+			$('#save').off('click').on('click', function (e) {
+				e.stopPropagation();
+				context.save();
+			});
+			$('#discard').off('click').on('click', function (e) {
+				e.stopPropagation();
+				context.discard();
+			});
 		},
 
 		setDomOptions: function () {
@@ -1268,8 +1302,77 @@
 			$('#routes').tagsInput({
 				'defaultText': '+',
 				'width': '185px',
-				'maxChars' : 5
+				'maxChars' : 5,
+				'interactive' : false
 			});
+		},
+
+		buildEditLayer: function () {
+			var editedLayer = L.layerGroup();
+			$.viewmodel.mapLayers['edit'] = $.viewmodel.map.addLayer(editedLayer);
+		},
+
+		save: function () {
+			this.finishEditing();
+
+		},
+
+		discard: function () {
+			this.finishEditing();
+
+		},
+
+		startEdit: function () {
+			var icon = $.sm.helpers.getIcon('stop-editable', 25),
+				vm = $.viewmodel,
+				v = $.view,
+				marker;
+			v.$body.addClass('editable');
+			v.$editorContainer.find('input, select, textarea, button').removeAttr('disabled');
+			v.$editorContainer.find('form').removeClass('disabled');
+			vm.editable = true;
+			marker = L.marker([vm.stopSelected.geom.lat, vm.stopSelected.geom.lon], {icon: icon, draggable: true});
+			marker.on('dragend', function (e) {
+				var latLon = e.target.getLatLng();
+				$('#lat').val(latLon.lat);
+				$('#lon').val(latLon.lng);
+			});
+			vm.mapLayers['edit'].addLayer(marker);
+			this.fillEditor(vm.stopSelected);
+			vm.map.closePopup();
+		},
+
+		fillEditor: function (stop) {
+			var helpers = $.sm.helpers;
+			$('#name').val(stop.name);
+			$('#id').val(stop.id).attr('disabled', 'disabled');
+			$('#lat').val(stop.geom.lat);
+			$('#lon').val(stop.geom.lon);
+			for (var i = 0, rl = stop.routes.length; i < rl; i +=1) {
+				$('#routes').addTag(stop.routes[i].nm)
+			}
+			for (var i = 0, tl = stop.types.length; i < tl; i +=1) {
+				$('#stype_' + stop.types[i].id).prop('checked', true);
+			}
+			$('#is_shelter').val(stop.is_shelter);
+			$('#is_bench').val(stop.is_bench);
+			// todo add block for TYPES
+			$('#pan_link').val(helpers.valueNullToString(stop.panorama_link));
+			$('#comment').val(helpers.valueNullToString(stop.comment));
+			$('#is_check').val(stop.is_check);
+		},
+
+		finishEditing: function () {
+			var vm = $.viewmodel,
+				v = $.view;
+			vm.mapLayers['edit'].clearLayers();
+			vm.editable = false;
+			v.$body.addClass('editable');
+			v.$editorContainer.find('input, textarea').val('');
+			v.$editorContainer.find('input:checkbox').prop('checked', false);
+			v.$editorContainer.find('input, select, textarea, button').attr('disabled', 'disabled');
+			v.$editorContainer.find('form').addClass('disabled');
+			$('#routes').importTags('');
 		}
 	});
 })(jQuery);
@@ -1297,6 +1400,9 @@
 			$.view.$document.on('/sm/osm/updateOsmLayer', function (e, isCleared) {
 				context.updateOsmLayer(isCleared);
 			});
+			$.viewmodel.map.on('zoomend', function (e) {
+				$.view.$document.trigger('/sm/osm/updateOsmLayer');
+			});
 		},
 
 		setDomOptions: function () {
@@ -1309,12 +1415,9 @@
 			$.viewmodel.mapLayers['osmStops'] = osmStopsLayerGroup;
 		},
 
-		updateOsmLayer: function (isCleared) {
+		updateOsmLayer: function () {
 			var validateZoom = this.validateZoom();
-			if (validateZoom) {
-				$.viewmodel.mapLayers.osmStops.clearLayers();
-				$.viewmodel.osmStops = {};
-			}
+			$.viewmodel.mapLayers.osmStops.clearLayers();
 			if (!validateZoom) { return; }
 
 			this.updateStopsFromXapi();
@@ -1366,10 +1469,12 @@
 		},
 
 		getApiUrl: function (boundingbox) {
-			var overpassUrl = "http://overpass-api.de/api/interpreter?data=[out:json];(node[highway=bus_stop]("
-				+ boundingbox.getSouthWest().lat + "," + boundingbox.getSouthWest().lng
-				+ "," + boundingbox.getNorthEast().lat
-				+ "," + boundingbox.getNorthEast().lng
+			var sw = boundingbox.getSouthWest(),
+				ne = boundingbox.getNorthEast(),
+				overpassUrl = "http://overpass-api.de/api/interpreter?data=[out:json];(node[highway=bus_stop]("
+				+ sw.lat + "," + sw.lng
+				+ "," + ne.lat
+				+ "," + ne.lng
 				+ ");>;);out;";
 			return overpassUrl;
 		},
@@ -1385,6 +1490,7 @@
 
 (function ($) {
 	$.extend($.viewmodel, {
+		stopSelected: null
 
 	});
 	$.extend($.view, {
@@ -1420,14 +1526,10 @@
 			$.viewmodel.mapLayers['edit'] = editGroup;
 		},
 
-		updateStops: function (isCleared) {
+		updateStops: function () {
 			var validateZoom = this.validateZoom();
-			if (validateZoom) {
-				$.viewmodel.mapLayers.stops.clearLayers();
-			}
-			if (!validateZoom) {
-				return;
-			}
+			$.viewmodel.mapLayers.stops.clearLayers();
+			if (!validateZoom) { return; }
 			this.updateStopsByAjax();
 		},
 
@@ -1475,15 +1577,25 @@
 						marker.bindPopup($.templates.stopPopupTemplate({ css: 'edit' }), {autoPan: false});
 						$.view.$document.off('/sm/map/openPopupEnd').on('/sm/map/openPopupEnd', function () {
 							$.getJSON(document['url_root'] + 'stop/' + e.target.stop_id, function (data) {
-								var html = $.templates.stopPopupInfoTemplate({
-									id: data.stop.id,
-									name: data.stop.name,
-									is_shelter: data.stop.is_shelter,
-									is_bench: data.stop.is_bench,
-									stop_type_id: data.stop.stop_type_id,
-									is_check: data.stop.is_check
-								});
+								$.viewmodel.stopSelected = data.stop;
+								var helper = $.sm.helpers,
+									html = $.templates.stopPopupInfoTemplate({
+										id: data.stop.id,
+										name: data.stop.name,
+										is_shelter: helper.boolToString(data.stop.is_shelter),
+										is_bench: helper.boolToString(data.stop.is_bench),
+										stop_type_id: helper.valueNullToString(data.stop.stop_type_id),
+										routes: data.stop.routes,
+										types: data.stop.types,
+										is_check: helper.boolToString(data.stop.is_check),
+										comment: helper.valueNullToString(data.stop.comment),
+										isUserEditor: $.viewmodel.isAuth,
+										editDenied: $.viewmodel.editable
+									});
 								$('#stop-popup').removeClass('loader').empty().append(html);
+								$('button#edit').off('click').on('click', function (e) {
+									$.view.$document.trigger('/sm/editor/startEdit');
+								});
 							}).error(function () {
 								$('#stop-popup').removeClass('loader').empty().append('Error connection');
 							});
@@ -1525,12 +1637,10 @@
 		bindEvents: function () {
 			var context = this;
 			$.view.$signInForm.find('button').off('click').on('click', function () {
-				$.viewmodel.isAuth = context.authorize();
-				context.updateUserUI();
+				context.authorize();
 			});
 			$.view.$signOutForm.find('button').off('click').on('click', function () {
 				context.signOut();
-				$.viewmodel.isAuth = false;
 			});
 		},
 
@@ -1546,18 +1656,23 @@
 		},
 
 		authorize: function () {
+			var context = this;
 			$.post(document['url_root'] + 'user/login', {'em': $('#em').val(), 'p': $('#p').val() }, null, 'json')
 				.done(function (data) {
 					$('#display-name').text(data.name);
+					$.viewmodel.isAuth = true;
+					context.updateUserUI();
 				})
 				.fail( function(xhr, textStatus, errorThrown) {
 					alert(xhr.status);
+					$.viewmodel.isAuth = false;
+					context.updateUserUI();
 				});
-			return true;
 		},
 
 		signOut: function () {
 			var context = this;
+			$.viewmodel.isAuth = false;
 			$.post(document['url_root'] + 'user/logout')
 				.done(function () {
 					context.updateUserUI();

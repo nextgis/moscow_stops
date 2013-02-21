@@ -1,5 +1,6 @@
 (function ($) {
 	$.extend($.viewmodel, {
+		stopSelected: null
 
 	});
 	$.extend($.view, {
@@ -35,14 +36,10 @@
 			$.viewmodel.mapLayers['edit'] = editGroup;
 		},
 
-		updateStops: function (isCleared) {
+		updateStops: function () {
 			var validateZoom = this.validateZoom();
-			if (validateZoom) {
-				$.viewmodel.mapLayers.stops.clearLayers();
-			}
-			if (!validateZoom) {
-				return;
-			}
+			$.viewmodel.mapLayers.stops.clearLayers();
+			if (!validateZoom) { return; }
 			this.updateStopsByAjax();
 		},
 
@@ -90,15 +87,25 @@
 						marker.bindPopup($.templates.stopPopupTemplate({ css: 'edit' }), {autoPan: false});
 						$.view.$document.off('/sm/map/openPopupEnd').on('/sm/map/openPopupEnd', function () {
 							$.getJSON(document['url_root'] + 'stop/' + e.target.stop_id, function (data) {
-								var html = $.templates.stopPopupInfoTemplate({
-									id: data.stop.id,
-									name: data.stop.name,
-									is_shelter: data.stop.is_shelter,
-									is_bench: data.stop.is_bench,
-									stop_type_id: data.stop.stop_type_id,
-									is_check: data.stop.is_check
-								});
+								$.viewmodel.stopSelected = data.stop;
+								var helper = $.sm.helpers,
+									html = $.templates.stopPopupInfoTemplate({
+										id: data.stop.id,
+										name: data.stop.name,
+										is_shelter: helper.boolToString(data.stop.is_shelter),
+										is_bench: helper.boolToString(data.stop.is_bench),
+										stop_type_id: helper.valueNullToString(data.stop.stop_type_id),
+										routes: data.stop.routes,
+										types: data.stop.types,
+										is_check: helper.boolToString(data.stop.is_check),
+										comment: helper.valueNullToString(data.stop.comment),
+										isUserEditor: $.viewmodel.isAuth,
+										editDenied: $.viewmodel.editable
+									});
 								$('#stop-popup').removeClass('loader').empty().append(html);
+								$('button#edit').off('click').on('click', function (e) {
+									$.view.$document.trigger('/sm/editor/startEdit');
+								});
 							}).error(function () {
 								$('#stop-popup').removeClass('loader').empty().append('Error connection');
 							});
