@@ -3,7 +3,7 @@ from moscow_stops.models import DBSession
 from pyramid.view import view_config
 from pyramid.response import Response
 from models import Stop
-from geoalchemy import WKTSpatialElement
+from sqlalchemy.orm import joinedload
 import transaction
 
 import json
@@ -23,7 +23,7 @@ class Stops(object):
 		           bbox['_northEast']['lng'], bbox['_northEast']['lat'], \
 		           bbox['_northEast']['lng'], bbox['_southWest']['lat'], \
 		           bbox['_southWest']['lng'], bbox['_southWest']['lat'])
-		stops_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).filter(Stop.geom.within(box_geom))
+		stops_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).options(joinedload(Stop.stop_types)).filter(Stop.geom.within(box_geom))
 
 		stops_result = {'stops' : {
 			'block' : {},
@@ -48,7 +48,7 @@ class Stops(object):
 	def get_stop(self):
 		id = self.request.matchdict.get('id', None)
 		session = DBSession()
-		stop_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).filter(Stop.id == id).one()
+		stop_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).options(joinedload(Stop.stop_types), joinedload(Stop.routes)).filter(Stop.id == id).one()
 
 		stops_result = {'stop': {}}
 		for col in stop_from_db[0].__table__.columns.keys():
