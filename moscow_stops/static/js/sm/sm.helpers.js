@@ -22,16 +22,16 @@
 			return res;
 		},
 
-		boolToString: function (bool) {
+		boolToString: function (bool, is_coded) {
 			switch (bool) {
 				case null:
-					return '';
+					return is_coded ? 'null' : '';
 					break;
-				case 'True':
-					return 'Да'
+				case true:
+					return is_coded ? 'true' : 'Да'
 					break;
-				case 'False':
-					return 'Нет'
+				case false:
+					return is_coded ? 'false' : 'Нет';
 					break;
 			}
 			throw 'The bool value is not convertible to string'

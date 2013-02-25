@@ -59,15 +59,14 @@ class Stop(Base):
 	__tablename__ = 'stops'
 
 	id = Column(Integer, Sequence('stops_id_seq'), primary_key=True)
-	geom = GeometryColumn(Geometry(2, 4326), nullable=False)
+	geom = GeometryColumn(Geometry(2, 4326, bounding_box='(xmin=35, ymin=55, xmax=39, ymax=57)'), nullable=False)
 	name = Column(Unicode(254), index=True, nullable=False)
 	is_bench = Column(Boolean, nullable=True)
 	is_shelter = Column(Boolean, nullable=True)
-	stop_type = relationship('StopType', secondary=stopsStopType, backref='stops')
-	# stop_type_id = Column(Integer, ForeignKey('stop_types.id'), nullable=True)
+	stop_types = relationship('StopType', secondary=stopsStopType, backref='stops')
 	comment = Column(Text, nullable=True)
 	panorama_link = Column(Unicode(500))
-	is_check = Column(Integer, nullable=True, default=0)
+	check_status = Column(Integer, nullable=True, default=0)
 	routes = relationship("Route", secondary=stopsRoutes, backref='stops')
 	is_block = Column(Boolean, nullable=True)
 	user_block = relationship('User')

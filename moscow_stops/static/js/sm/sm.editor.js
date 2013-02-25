@@ -148,8 +148,8 @@
 			for (var i = 0, tl = stop.types.length; i < tl; i += 1) {
 				$('#stype_' + stop.types[i].id).prop('checked', true);
 			}
-			$('#is_shelter').val(stop.is_shelter);
-			$('#is_bench').val(stop.is_bench);
+			$('#is_shelter').val(helpers.boolToString(stop.is_shelter, true));
+			$('#is_bench').val(helpers.boolToString(stop.is_bench, true));
 			$('#pan_link').val(helpers.valueNullToString(stop.panorama_link));
 			$('#comment').val(helpers.valueNullToString(stop.comment));
 			$('#is_check').val(stop.is_check);

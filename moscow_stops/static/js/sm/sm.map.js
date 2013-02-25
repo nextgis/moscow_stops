@@ -25,7 +25,7 @@
 						if (smarker && !$.viewmodel.isPopupOpened) {
 							smarker.openPopup();
 							$.viewmodel.isPopupOpened = true;
-							$.view.$document.trigger('/sm/map/openPopupEnd');
+							$.view.$document.trigger('/sm/map/openPopupEnd', [smarker]);
 						}
 					});
 			});

@@ -421,6 +421,14 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 	background: url('../img/sm-icons.png') -20px -145px;
 }
 
+#map .stop-check {
+	background: url('../img/sm-icons.png') -40px -145px;
+}
+
+#map .stop-check:hover {
+	background: url('../img/sm-icons.png') -60px -145px;
+}
+
 #map .stop-editable {
 	background: url('../img/sm-icons.png') -25px -165px;
 }

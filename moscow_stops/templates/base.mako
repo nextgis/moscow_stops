@@ -144,16 +144,16 @@ class="inner"
 				<label class="control-label" for="is_shelter">Крыша</label>
 				<select id="is_shelter" class="stand" name="is_shelter" disabled="disabled">
 					<option value="None"></option>
-					<option value="True">Да</option>
-					<option value="False">Нет</option>
+					<option value="true">Да</option>
+					<option value="false">Нет</option>
 				</select>
 			</div>
 			<div class="group">
 				<label class="control-label" for="is_bench">Скамейка</label>
 				<select id="is_bench" class="stand" name="is_bench" disabled="disabled">
 					<option value="None"></option>
-					<option value="True">Да</option>
-					<option value="False">Нет</option>
+					<option value="true">Да</option>
+					<option value="false">Нет</option>
 				</select>
 			</div>
 			<div class="group">
