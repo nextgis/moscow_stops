@@ -54,6 +54,31 @@
 					return 'Проверена'
 					break;
 			}
+		},
+
+		sortByFields: function () {
+			var props = arguments,
+				context = this;
+			return function (obj1, obj2) {
+				var i = 0, result = 0, numberOfProperties = props.length;
+				while(result === 0 && i < numberOfProperties) {
+					result = context.dynamicSort(props[i])(obj1, obj2);
+					i++;
+				}
+				return result;
+			}
+		},
+
+		dynamicSort: function (property) {
+			var sortOrder = 1;
+			if(property[0] === "-") {
+				sortOrder = -1;
+				property = property.substr(1, property.length - 1);
+			}
+			return function (a,b) {
+				var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+				return result * sortOrder;
+			}
 		}
 	});
 })(jQuery);

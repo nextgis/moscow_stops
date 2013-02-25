@@ -194,7 +194,7 @@
 
 		this.each(function() { 
 			if (settings.hide) { 
-				$(this).hide();				
+				$(this).hide();
 			}
 			var id = $(this).attr('id');
 			if (!id || delimiter[$(this).attr('id')]) {

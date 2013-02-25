@@ -50,9 +50,11 @@
 				context.discard();
 			});
 			$('#route_type').off('change').on('change', function (e) {
+				var newRouteType = e.target.value;
 				$('#route_type_' + $.viewmodel.routeTypeSelected).hide();
-				$('#route_type_' + e.target.value).show();
-				$.viewmodel.routeTypeSelected = e.target.value;
+				$('#route_type_' + newRouteType).show();
+				$.viewmodel.routeTypeSelected = newRouteType;
+				context.changeRouteType(newRouteType);
 			});
 		},
 
@@ -142,9 +144,8 @@
 			$('#id').val(stop.id).attr('disabled', 'disabled');
 			$('#lat').val(stop.geom.lat);
 			$('#lon').val(stop.geom.lon);
-			for (var i = 0, rl = stop.routes.length; i < rl; i += 1) {
-				$('#routes').addTag(stop.routes[i].name);
-			}
+			this.fillRoutes(stop.routes);
+			this.changeRouteType($.viewmodel.routeTypeSelected);
 			for (var i = 0, tl = stop.types.length; i < tl; i += 1) {
 				$('#stype_' + stop.types[i].id).prop('checked', true);
 			}
@@ -153,6 +154,43 @@
 			$('#pan_link').val(helpers.valueNullToString(stop.panorama_link));
 			$('#comment').val(helpers.valueNullToString(stop.comment));
 			$('#is_check').val(stop.is_check);
+		},
+
+		fillRoutes: function (routes) {
+			var helpers = $.sm.helpers,
+				routes_sorted = routes.sort(helpers.sortByFields('route_type_id', 'id')),
+				i = 0,
+				routesCount= routes_sorted.length,
+				routesEditable = {};
+
+			for (i; i < routesCount; i += 1) {
+				if (!routesEditable[routes_sorted[i].route_type_id]) { routesEditable[routes_sorted[i].route_type_id] = []; }
+				routesEditable[routes_sorted[i].route_type_id].push(routes_sorted[i])
+			}
+
+			$.viewmodel.stopSelected['routes'] = routesEditable;
+		},
+
+		changeRouteType: function (routeTypeId) {
+			var routes = $.viewmodel.stopSelected.routes[routeTypeId],
+				i = 0,
+				routesCount;
+
+			this.clearRoutes();
+
+			if (routes) {
+				routesCount = routes.length;
+			} else {
+				return false;
+			}
+
+			for (i; i < routesCount; i += 1) {
+				$('#routes').addTag(routes[i].name);
+			}
+		},
+
+		clearRoutes: function() {
+			$('#routes').importTags('');
 		},
 
 		finishEditing: function () {
