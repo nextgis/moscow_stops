@@ -124,8 +124,8 @@ class="inner"
 				</select>
 				% for k, v in routes.iteritems():
 					<select id="route_type_${k}" class="route" disabled="disabled" style="display: none;">
-						% for k, v in v.iteritems():
-							<option value="${k}">${v.name}</option>
+						% for route in v:
+							<option value="${route.id}">${route.name}</option>
 						% endfor
 					</select>
 				% endfor
