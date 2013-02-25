@@ -97,7 +97,7 @@
 										stop_type_id: helper.valueNullToString(data.stop.stop_type_id),
 										routes: data.stop.routes,
 										types: data.stop.types,
-										is_check: helper.boolToString(data.stop.is_check),
+										is_check: helper.valueCheckToString(data.stop.is_check),
 										comment: helper.valueNullToString(data.stop.comment),
 										isUserEditor: $.viewmodel.isAuth,
 										editDenied: $.viewmodel.editable

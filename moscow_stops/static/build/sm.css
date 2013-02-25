@@ -320,6 +320,31 @@ body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
 	width: 197px;
 }
 
+#editorContainer form select.route-type-sel {
+	margin-bottom: 5px;
+	width: 65px;
+	max-width: 65px;
+}
+
+#editorContainer form select.route {
+	margin: 0px 0px 5px 5px;
+	width: 97px;
+	max-width: 97px;
+}
+
+#add-route {
+	float: right;
+	width: 25px;
+	height: 26px;
+	margin: 3px 0px 0px 0px;
+	background: url('../img/sm-icons.png') -29px -100px;
+}
+
+#add-route:hover {
+	background: url('../img/sm-icons.png') -54px -100px;
+	cursor: pointer;
+}
+
 #editorContainer form textarea {
 	resize: none;
 }

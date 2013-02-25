@@ -29,7 +29,6 @@
 	<script src="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/leaflet.markercluster-src.js')}"></script>
 
 	<script type="text/javascript" src="${request.static_url('moscow_stops:static/build/sm.min.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/jquery.cookie.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/tagsinput/jquery.tagsinput.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/mustache.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.loader.js')}"></script>
@@ -110,27 +109,40 @@ class="inner"
 		<form class="form-inline disabled">
 			<div class="group">
 				<label class="control-label middle" for="name">Название</label>
-				<input type="text" id="name" class="stand" disabled="disabled"/>
+				<input type="text" id="name" name="name" class="stand" disabled="disabled"/>
 			</div>
 			<div class="group">
 				<label class="control-label middle" for="id">ID</label>
-				<input type="text" id="id" class="stand" disabled="disabled"/>
+				<input type="text" id="id" name="id" class="stand" disabled="disabled"/>
 			</div>
 			<div class="group">
 				<label class="control-label top" for="routes">Маршруты</label>
+				<select id="route_type" class="route-type-sel" disabled="disabled">
+					% for k, v in routes_types.iteritems():
+						<option value="${k}">${v.name}</option>
+					% endfor
+				</select>
+				% for k, v in routes.iteritems():
+					<select id="route_type_${k}" class="route" disabled="disabled" style="display: none;">
+						% for k, v in v.iteritems():
+							<option value="${k}">${v.name}</option>
+						% endfor
+					</select>
+				% endfor
+				<a id="add-route" title="Добавить маршрут"></a>
 				<input name="tags" id="routes" value=""/>
 			</div>
 			<div class="group">
 				<label class="control-label" for="lat">Широта</label>
-				<input type="text" id="lat" class="stand" disabled="disabled"/>
+				<input type="text" id="lat" name="lat" class="stand" disabled="disabled"/>
 			</div>
 			<div class="group">
 				<label class="control-label" for="lon">Долгота</label>
-				<input type="text" id="lon" class="stand" disabled="disabled"/>
+				<input type="text" id="lon" name="lon" class="stand" disabled="disabled"/>
 			</div>
 			<div class="group">
 				<label class="control-label" for="is_shelter">Крыша</label>
-				<select id="is_shelter" class="stand" disabled="disabled">
+				<select id="is_shelter" class="stand" name="is_shelter" disabled="disabled">
 					<option value="None"></option>
 					<option value="True">Да</option>
 					<option value="False">Нет</option>
@@ -138,10 +150,10 @@ class="inner"
 			</div>
 			<div class="group">
 				<label class="control-label" for="is_bench">Скамейка</label>
-				<select id="is_bench" class="stand" disabled="disabled">
+				<select id="is_bench" class="stand" name="is_bench" disabled="disabled">
 					<option value="None"></option>
-					<option value="Small">Да</option>
-					<option value="Big">Нет</option>
+					<option value="True">Да</option>
+					<option value="False">Нет</option>
 				</select>
 			</div>
 			<div class="group">
@@ -167,18 +179,18 @@ class="inner"
 			</div>
 			<div class="group">
 				<label class="control-label top" for="pan_link">Ссылка на панораму</label>
-				<input type="text" id="pan_link" class="stand" disabled="disabled"/>
+				<input type="text" name="panorama_link" id="pan_link" class="stand" disabled="disabled"/>
 				<div class="link">
 					<a id="pan_link_a" target="_blank"></a>
 				</div>
 			</div>
 			<div class="group">
 				<label class="control-label top" for="comment">Комментарий</label>
-				<textarea id="comment" disabled="disabled"></textarea>
+				<textarea id="comment" name="comment" disabled="disabled"></textarea>
 			</div>
 			<div class="group">
 				<label class="control-label" for="is_check">Проверка на местности</label>
-				<select id="is_check" class="stand" disabled="disabled">
+				<select id="is_check" name="is_check" class="stand" disabled="disabled">
 					<option value="0">Не нужна</option>
 					<option value="1">Нужна</option>
 					<option value="2">Проверена</option>
@@ -189,7 +201,7 @@ class="inner"
 				<input type="text" id="photo" class="stand" disabled="disabled"/>
 			</div>
 			<div class="group-checkboxes">
-				<input type="checkbox" id="is_help" class="stand" disabled="disabled"/>
+				<input type="checkbox" id="is_help" name="is_help" class="stand" disabled/>
 				<label class="control-label top" for="is_help">Нужна помощь</label>
 			</div>
 			<div class="group-submit">

@@ -24,7 +24,7 @@
 
 		boolToString: function (bool) {
 			switch (bool) {
-				case 'None':
+				case null:
 					return '';
 					break;
 				case 'True':
@@ -38,8 +38,22 @@
 		},
 
 		valueNullToString: function (val) {
-			if (val === 'None') { return ''; }
+			if (val === null) { return ''; }
 			return val;
+		},
+
+		valueCheckToString: function (val) {
+			switch (val) {
+				case 0:
+					return 'Не нужна';
+					break;
+				case 1:
+					return 'Нужна'
+					break;
+				case 2:
+					return 'Проверена'
+					break;
+			}
 		}
 	});
 })(jQuery);

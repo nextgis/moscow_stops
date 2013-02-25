@@ -1,95 +1,3 @@
-/*!
- * jQuery Cookie Plugin v1.3.1
- * https://github.com/carhartl/jquery-cookie
- *
- * Copyright 2013 Klaus Hartl
- * Released under the MIT license
- */
-(function (factory) {
-	if (typeof define === 'function' && define.amd && define.amd.jQuery) {
-		// AMD. Register as anonymous module.
-		define(['jquery'], factory);
-	} else {
-		// Browser globals.
-		factory(jQuery);
-	}
-}(function ($) {
-
-	var pluses = /\+/g;
-
-	function raw(s) {
-		return s;
-	}
-
-	function decoded(s) {
-		return decodeURIComponent(s.replace(pluses, ' '));
-	}
-
-	function converted(s) {
-		if (s.indexOf('"') === 0) {
-			// This is a quoted cookie as according to RFC2068, unescape
-			s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-		}
-		try {
-			return config.json ? JSON.parse(s) : s;
-		} catch(er) {}
-	}
-
-	var config = $.cookie = function (key, value, options) {
-
-		// write
-		if (value !== undefined) {
-			options = $.extend({}, config.defaults, options);
-
-			if (typeof options.expires === 'number') {
-				var days = options.expires, t = options.expires = new Date();
-				t.setDate(t.getDate() + days);
-			}
-
-			value = config.json ? JSON.stringify(value) : String(value);
-
-			return (document.cookie = [
-				encodeURIComponent(key), '=', config.raw ? value : encodeURIComponent(value),
-				options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
-				options.path    ? '; path=' + options.path : '',
-				options.domain  ? '; domain=' + options.domain : '',
-				options.secure  ? '; secure' : ''
-			].join(''));
-		}
-
-		// read
-		var decode = config.raw ? raw : decoded;
-		var cookies = document.cookie.split('; ');
-		var result = key ? undefined : {};
-		for (var i = 0, l = cookies.length; i < l; i++) {
-			var parts = cookies[i].split('=');
-			var name = decode(parts.shift());
-			var cookie = decode(parts.join('='));
-
-			if (key && key === name) {
-				result = converted(cookie);
-				break;
-			}
-
-			if (!key) {
-				result[name] = converted(cookie);
-			}
-		}
-
-		return result;
-	};
-
-	config.defaults = {};
-
-	$.removeCookie = function (key, options) {
-		if ($.cookie(key) !== undefined) {
-			$.cookie(key, '', $.extend(options, { expires: -1 }));
-			return true;
-		}
-		return false;
-	};
-
-}));
 /*
 
 	jQuery Tags Input Plugin 1.3.3
@@ -1074,7 +982,7 @@
 
 		boolToString: function (bool) {
 			switch (bool) {
-				case 'None':
+				case null:
 					return '';
 					break;
 				case 'True':
@@ -1088,8 +996,22 @@
 		},
 
 		valueNullToString: function (val) {
-			if (val === 'None') { return ''; }
+			if (val === null) { return ''; }
 			return val;
+		},
+
+		valueCheckToString: function (val) {
+			switch (val) {
+				case 0:
+					return 'Не нужна';
+					break;
+				case 1:
+					return 'Нужна'
+					break;
+				case 2:
+					return 'Проверена'
+					break;
+			}
 		}
 	});
 })(jQuery);(function ($) {
@@ -1246,7 +1168,8 @@
 (function ($) {
 	$.extend($.viewmodel, {
 		editorCollapsed: false,
-		editable: false
+		editable: false,
+		routeTypeSelected: null
 	});
 
 	$.extend($.view, {
@@ -1261,6 +1184,7 @@
 			this.setDomOptions();
 			this.buildTags();
 			this.buildEditLayer();
+			this.buildRoutesSelector();
 			this.bindEvents();
 		},
 
@@ -1292,6 +1216,11 @@
 				e.stopPropagation();
 				context.discard();
 			});
+			$('#route_type').off('change').on('change', function (e) {
+				$('#route_type_' + $.viewmodel.routeTypeSelected).hide();
+				$('#route_type_' + e.target.value).show();
+				$.viewmodel.routeTypeSelected = e.target.value;
+			});
 		},
 
 		setDomOptions: function () {
@@ -1312,14 +1241,46 @@
 			$.viewmodel.mapLayers['edit'] = $.viewmodel.map.addLayer(editedLayer);
 		},
 
-		save: function () {
-			this.finishEditing();
+		buildRoutesSelector: function () {
+			var route_type_selected = $('#route_type').find(":selected").val();
+			$('#route_type_' + route_type_selected).show();
+			$.viewmodel.routeTypeSelected = route_type_selected;
+		},
 
+		save: function () {
+			var context = this,
+				frm = $('#editorContainer form'),
+				data_serialized = frm.serializeArray(),
+				i = 0,
+				ds_length = data_serialized.length,
+				url = document['url_root'] + 'stop/' + $.viewmodel.stopSelected.id,
+				stop = { 'id' :  $.viewmodel.stopSelected.id },
+				name;
+			for (i; i < ds_length; i += 1) {
+				name = data_serialized[i].name;
+				switch (name) {
+					case name === 'lon':
+						stop['geom']['lon'] = data_serialized[i].value;
+						break;
+					case name === 'lat':
+						stop['geom']['lat'] = data_serialized[i].value;
+						break;
+					default:
+						stop[data_serialized[i].name] = data_serialized[i].value;
+						break;
+				}
+			}
+			$.ajax({
+				type: 'POST',
+				url: url,
+				data: { 'stop' : JSON.stringify(stop)}
+			}).done(function () {
+					context.finishEditing();
+			});
 		},
 
 		discard: function () {
 			this.finishEditing();
-
 		},
 
 		startEdit: function () {
@@ -1348,22 +1309,22 @@
 			$('#id').val(stop.id).attr('disabled', 'disabled');
 			$('#lat').val(stop.geom.lat);
 			$('#lon').val(stop.geom.lon);
-			for (var i = 0, rl = stop.routes.length; i < rl; i +=1) {
-				$('#routes').addTag(stop.routes[i].nm)
+			for (var i = 0, rl = stop.routes.length; i < rl; i += 1) {
+				$('#routes').addTag(stop.routes[i].name);
 			}
-			for (var i = 0, tl = stop.types.length; i < tl; i +=1) {
+			for (var i = 0, tl = stop.types.length; i < tl; i += 1) {
 				$('#stype_' + stop.types[i].id).prop('checked', true);
 			}
 			$('#is_shelter').val(stop.is_shelter);
 			$('#is_bench').val(stop.is_bench);
-			// todo add block for TYPES
 			$('#pan_link').val(helpers.valueNullToString(stop.panorama_link));
 			$('#comment').val(helpers.valueNullToString(stop.comment));
 			$('#is_check').val(stop.is_check);
 		},
 
 		finishEditing: function () {
-			var vm = $.viewmodel,
+			var vd = $.view.$document,
+				vm = $.viewmodel,
 				v = $.view;
 			vm.mapLayers['edit'].clearLayers();
 			vm.editable = false;
@@ -1373,6 +1334,8 @@
 			v.$editorContainer.find('input, select, textarea, button').attr('disabled', 'disabled');
 			v.$editorContainer.find('form').addClass('disabled');
 			$('#routes').importTags('');
+			vd.trigger('/sm/osm/updateOsmLayer');
+			vd.trigger('/sm/stops/updateStops')
 		}
 	});
 })(jQuery);
@@ -1587,7 +1550,7 @@
 										stop_type_id: helper.valueNullToString(data.stop.stop_type_id),
 										routes: data.stop.routes,
 										types: data.stop.types,
-										is_check: helper.boolToString(data.stop.is_check),
+										is_check: helper.valueCheckToString(data.stop.is_check),
 										comment: helper.valueNullToString(data.stop.comment),
 										isUserEditor: $.viewmodel.isAuth,
 										editDenied: $.viewmodel.editable
