@@ -54,7 +54,6 @@
 				$('#route_type_' + $.viewmodel.routeTypeSelected).hide();
 				$('#route_type_' + newRouteType).show();
 				$.viewmodel.routeTypeSelected = newRouteType;
-				context.changeRouteType(newRouteType);
 			});
 			$('#add-route').off('click').on('click', function (e) {
 				var $selectedOption = $('#route_type_' + $.viewmodel.routeTypeSelected).find(":selected");
@@ -73,7 +72,9 @@
 				'width': '185px',
 				'maxChars' : 5,
 				'interactive': false,
-				'onRemoveTag': function (e) { context.removeRoute(e); context.changeRouteType(); }
+				'onRemoveTag': function (e) {
+					context.removeRoute(e);
+				}
 			});
 		},
 
@@ -151,7 +152,6 @@
 			$('#lat').val(stop.geom.lat);
 			$('#lon').val(stop.geom.lon);
 			this.fillRoutes(stop.routes);
-			this.changeRouteType($.viewmodel.routeTypeSelected);
 			for (var i = 0, tl = stop.types.length; i < tl; i += 1) {
 				$('#stype_' + stop.types[i].id).prop('checked', true);
 			}
@@ -167,77 +167,64 @@
 				routes_sorted = routes.sort(helpers.sortByFields('route_type_id', 'name')),
 				i = 0,
 				routesCount= routes_sorted.length,
-				routesEditable = {};
+				routesEditable = {'ids' : {}, 'routes' : routes_sorted};
 
 			for (i; i < routesCount; i += 1) {
-				if (!routesEditable[routes_sorted[i].route_type_id]) {
-					routesEditable[routes_sorted[i].route_type_id] = { 'ids' : {}, 'routes' : [] };
-				}
-				routesEditable[routes_sorted[i].route_type_id].routes.push(routes_sorted[i]);
-				routesEditable[routes_sorted[i].route_type_id].ids[routes_sorted[i].id] = true;
+				routesEditable.ids[routes_sorted[i].id] = true;
+				$('#routes').addTag(routes_sorted[i].name, { 'css_class' : 'tag type-id-' + routes_sorted[i].route_type_id});
 			}
 
 			$.viewmodel.stopSelected['routes'] = routesEditable;
 		},
 
-		changeRouteType: function (routeTypeId) {
-			var routeTypeId = routeTypeId || $.viewmodel.routeTypeSelected,
-				routes = $.viewmodel.stopSelected.routes[routeTypeId],
-				i = 0,
-				routesCount;
-
-			this.clearRoutes();
-
-			if (routes) {
-				routesCount = routes.routes.length;
-			} else {
-				return false;
-			}
-
-			for (i; i < routesCount; i += 1) {
-				$('#routes').addTag(routes.routes[i].name, { 'css_class' : 'tag type-id-' + routeTypeId});
-			}
-		},
-
-		clearRoutes: function() {
-			$('#routes').importTags('');
-		},
-
 		addRoute: function (id, name) {
 			var vm = $.viewmodel,
 				routeTypeId = vm.routeTypeSelected,
-				routes = vm.stopSelected.routes[routeTypeId].routes,
-				ids = vm.stopSelected.routes[routeTypeId].ids;
-			if (ids[id]) {
+				routes = vm.stopSelected.routes;
+			if (routes.ids[id]) {
 				return false;
 			} else {
-				ids[id] = true;
+				routes.ids[id] = true;
 			}
-			routes.push({
+			routes.routes.push({
 				"route_type_id": routeTypeId,
 				"id": id,
 				"name": name
 			});
-			vm.stopSelected.routes[routeTypeId].routes = routes.sort($.sm.helpers.sortByFields('name'));
-			this.changeRouteType(routeTypeId);
+			this.updateUIRoutes(routes.routes);
 		},
 
 		removeRoute: function (name) {
 			var vm = $.viewmodel,
-				routeTypeId = vm.routeTypeSelected,
-				routes = vm.stopSelected.routes[routeTypeId].routes,
-				ids = vm.stopSelected.routes[routeTypeId].ids,
+				routes = vm.stopSelected.routes,
 				removedRoute,
 				i = 0,
-				routesCount = routes.length;
+				routesCount = routes.routes.length;
 			for (i; i < routesCount; i += 1) {
-				if (routes[i].name === name) {
-					removedRoute = routes[i];
-					ids[removedRoute.id] = false;
-					routes.splice(i, 1);
-					return true;
+				if (routes.routes[i].name === name) {
+					removedRoute = routes.routes[i];
+					routes.ids[removedRoute.id] = false;
+					routes.routes.splice(i, 1);
+					break;
 				}
 			}
+			this.updateUIRoutes(routes.routes);
+		},
+
+		updateUIRoutes: function (routes) {
+			var i = 0,
+				routesCount= routes.length;
+
+			routes = routes.sort($.sm.helpers.sortByFields('route_type_id', 'name'));
+			this.clearUIRoutes();
+
+			for (i; i < routesCount; i += 1) {
+				$('#routes').addTag(routes[i].name, { 'css_class' : 'tag type-id-' + routes[i].route_type_id});
+			}
+		},
+
+		clearUIRoutes: function() {
+			$('#routes').importTags('');
 		},
 
 		finishEditing: function () {
