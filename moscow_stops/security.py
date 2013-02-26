@@ -23,6 +23,7 @@ def login(context, request):
 	if user:
 		request.session['sk'] = generate_session_id()
 		request.session['u_name'] = user.display_name
+		request.session['u_id'] = user.id
 		response = Response(json.dumps({'name' : request.session['u_name'] }))
 		response.set_cookie('sk', value=request.session['sk'], max_age=86400)
 		return response

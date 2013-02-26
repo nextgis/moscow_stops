@@ -1230,8 +1230,7 @@
 				}
 			});
 			$.view.$document.on('/sm/editor/startEdit', function (e) {
-				context.startEdit();
-
+				context.startAjaxEdit();
 			});
 			$('#save').off('click').on('click', function (e) {
 				e.stopPropagation();
@@ -1315,6 +1314,16 @@
 
 		discard: function () {
 			this.finishEditing();
+		},
+
+		startAjaxEdit: function () {
+			var context = this;
+			$.ajax({
+				type: 'GET',
+				url: document['url_root'] + 'stop/block/' + $.viewmodel.stopSelected.id
+			}).done(function () {
+					context.startEdit();
+				});
 		},
 
 		startEdit: function () {

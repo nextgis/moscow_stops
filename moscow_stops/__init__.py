@@ -23,6 +23,8 @@ def main(global_config, **settings):
 	config.add_route('home', '/')
 	config.add_route('stops', '/stops')
 	config.add_route('stop', '/stop/{id}')
+	config.add_route('stop_block', '/stop/block/{id}')
+	config.add_route('stop_unblock', '/stop/unblock/{id}')
 	config.add_route('login', '/user/login')
 	config.add_route('logout', '/user/logout')
 	config.scan()
