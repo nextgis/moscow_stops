@@ -74,7 +74,7 @@
   };
   
 	$.fn.addTag = function(value,options) {
-			options = jQuery.extend({focus:false,callback:true},options);
+			options = jQuery.extend({focus:false, callback:true, 'css_class':'tag'},options);
 			this.each(function() { 
 				var id = $(this).attr('id');
 
@@ -96,7 +96,7 @@
 				}
 				
 				if (value !='' && skipTag != true) { 
-                    $('<span>').addClass('tag').append(
+                    $('<span>').addClass(options.css_class).append(
                         $('<span>').text(value).append('&nbsp;&nbsp;'),
                         $('<a>', {
                             href  : '#',

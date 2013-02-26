@@ -74,7 +74,7 @@
   };
   
 	$.fn.addTag = function(value,options) {
-			options = jQuery.extend({focus:false,callback:true},options);
+			options = jQuery.extend({focus:false, callback:true, 'css_class':'tag'},options);
 			this.each(function() { 
 				var id = $(this).attr('id');
 
@@ -96,7 +96,7 @@
 				}
 				
 				if (value !='' && skipTag != true) { 
-                    $('<span>').addClass('tag').append(
+                    $('<span>').addClass(options.css_class).append(
                         $('<span>').text(value).append('&nbsp;&nbsp;'),
                         $('<a>', {
                             href  : '#',
@@ -1248,6 +1248,10 @@
 				$.viewmodel.routeTypeSelected = newRouteType;
 				context.changeRouteType(newRouteType);
 			});
+			$('#add-route').off('click').on('click', function (e) {
+				var $selectedOption = $('#route_type_' + $.viewmodel.routeTypeSelected).find(":selected");
+				context.addRoute($selectedOption.val(), $selectedOption.text());
+			});
 		},
 
 		setDomOptions: function () {
@@ -1255,11 +1259,13 @@
 		},
 
 		buildTags: function () {
+			var context = this;
 			$('#routes').tagsInput({
 				'defaultText': '+',
 				'width': '185px',
 				'maxChars' : 5,
-				'interactive' : false
+				'interactive': false,
+				'onRemoveTag': function (e) { context.removeRoute(e); context.changeRouteType(); }
 			});
 		},
 
@@ -1350,39 +1356,80 @@
 
 		fillRoutes: function (routes) {
 			var helpers = $.sm.helpers,
-				routes_sorted = routes.sort(helpers.sortByFields('route_type_id', 'id')),
+				routes_sorted = routes.sort(helpers.sortByFields('route_type_id', 'name')),
 				i = 0,
 				routesCount= routes_sorted.length,
 				routesEditable = {};
 
 			for (i; i < routesCount; i += 1) {
-				if (!routesEditable[routes_sorted[i].route_type_id]) { routesEditable[routes_sorted[i].route_type_id] = []; }
-				routesEditable[routes_sorted[i].route_type_id].push(routes_sorted[i])
+				if (!routesEditable[routes_sorted[i].route_type_id]) {
+					routesEditable[routes_sorted[i].route_type_id] = { 'ids' : {}, 'routes' : [] };
+				}
+				routesEditable[routes_sorted[i].route_type_id].routes.push(routes_sorted[i]);
+				routesEditable[routes_sorted[i].route_type_id].ids[routes_sorted[i].id] = true;
 			}
 
 			$.viewmodel.stopSelected['routes'] = routesEditable;
 		},
 
 		changeRouteType: function (routeTypeId) {
-			var routes = $.viewmodel.stopSelected.routes[routeTypeId],
+			var routeTypeId = routeTypeId || $.viewmodel.routeTypeSelected,
+				routes = $.viewmodel.stopSelected.routes[routeTypeId],
 				i = 0,
 				routesCount;
 
 			this.clearRoutes();
 
 			if (routes) {
-				routesCount = routes.length;
+				routesCount = routes.routes.length;
 			} else {
 				return false;
 			}
 
 			for (i; i < routesCount; i += 1) {
-				$('#routes').addTag(routes[i].name);
+				$('#routes').addTag(routes.routes[i].name, { 'css_class' : 'tag type-id-' + routeTypeId});
 			}
 		},
 
 		clearRoutes: function() {
 			$('#routes').importTags('');
+		},
+
+		addRoute: function (id, name) {
+			var vm = $.viewmodel,
+				routeTypeId = vm.routeTypeSelected,
+				routes = vm.stopSelected.routes[routeTypeId].routes,
+				ids = vm.stopSelected.routes[routeTypeId].ids;
+			if (ids[id]) {
+				return false;
+			} else {
+				ids[id] = true;
+			}
+			routes.push({
+				"route_type_id": routeTypeId,
+				"id": id,
+				"name": name
+			});
+			vm.stopSelected.routes[routeTypeId].routes = routes.sort($.sm.helpers.sortByFields('name'));
+			this.changeRouteType(routeTypeId);
+		},
+
+		removeRoute: function (name) {
+			var vm = $.viewmodel,
+				routeTypeId = vm.routeTypeSelected,
+				routes = vm.stopSelected.routes[routeTypeId].routes,
+				ids = vm.stopSelected.routes[routeTypeId].ids,
+				removedRoute,
+				i = 0,
+				routesCount = routes.length;
+			for (i; i < routesCount; i += 1) {
+				if (routes[i].name === name) {
+					removedRoute = routes[i];
+					ids[removedRoute.id] = false;
+					routes.splice(i, 1);
+					return true;
+				}
+			}
 		},
 
 		finishEditing: function () {

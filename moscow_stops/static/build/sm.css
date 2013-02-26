@@ -424,6 +424,44 @@ body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
 	cursor: pointer;
 }
 
+#routes_tagsinput span.tag {
+	font-size: 12px;
+	margin-bottom: 3px;
+	margin-right: 3px;
+	padding: 1px;
+}
+
+#routes_tagsinput span.tag.type-id-0 {
+	background-color: #ffc9c1;
+	border-color: #ef7b71;
+}
+
+#routes_tagsinput span.tag.type-id-0,
+#routes_tagsinput span.tag.type-id-0 a {
+	color: #e54541;
+}
+
+#routes_tagsinput span.tag.type-id-1 {
+	background-color: #d5efff;
+	border-color: #596fb3;
+}
+
+#routes_tagsinput span.tag.type-id-1,
+#routes_tagsinput span.tag.type-id-1 a {
+	color: #6766df;
+}
+
+#routes_tagsinput span.tag.type-id-2 {
+	background-color: #fff9ae;
+	border-color: #b3ac5f;
+}
+
+#routes_tagsinput span.tag.type-id-2,
+#routes_tagsinput span.tag.type-id-2 a {
+	color: #9a4d00;
+}
+
+
 #editorContainer .parameters {
 	display: table-cell;
 	width: 197px;
