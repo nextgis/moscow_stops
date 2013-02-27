@@ -1230,7 +1230,7 @@
 				}
 			});
 			$.view.$document.on('/sm/editor/startEdit', function (e) {
-				context.startAjaxEdit();
+				context.startAjaxEdition();
 			});
 			$('#save').off('click').on('click', function (e) {
 				e.stopPropagation();
@@ -1238,7 +1238,7 @@
 			});
 			$('#discard').off('click').on('click', function (e) {
 				e.stopPropagation();
-				context.discard();
+				context.finishAjaxEdition();
 			});
 			$('#route_type').off('change').on('change', function (e) {
 				var newRouteType = e.target.value;
@@ -1308,15 +1308,11 @@
 				url: url,
 				data: { 'stop' : JSON.stringify(stop)}
 			}).done(function () {
-					context.finishEditing();
+					context.finishAjaxEdition();
 			});
 		},
 
-		discard: function () {
-			this.finishEditing();
-		},
-
-		startAjaxEdit: function () {
+		startAjaxEdition: function () {
 			var context = this;
 			$.ajax({
 				type: 'GET',
@@ -1426,6 +1422,16 @@
 
 		clearUIRoutes: function() {
 			$('#routes').importTags('');
+		},
+
+		finishAjaxEdition: function () {
+			var context = this;
+			$.ajax({
+				type: 'GET',
+				url: document['url_root'] + 'stop/unblock/' + $.viewmodel.stopSelected.id
+			}).done(function () {
+					context.finishEditing();
+				});
 		},
 
 		finishEditing: function () {
@@ -1723,17 +1729,6 @@
 	$.extend($.sm.user, {
 		init: function () {
 			this.setDomOptions();
-			this.bindEvents();
-		},
-
-		bindEvents: function () {
-			var context = this;
-			$.view.$signInForm.find('button').off('click').on('click', function () {
-				context.authorize();
-			});
-			$.view.$signOutForm.find('button').off('click').on('click', function () {
-				context.signOut();
-			});
 		},
 
 		setDomOptions: function () {
@@ -1741,35 +1736,6 @@
 			$.view.$signInForm = $('#signInForm');
 			$.view.$signOutForm = $('#signOutForm');
 			if ($.view.$userContainer.hasClass('inner')) { $.viewmodel.isAuth = true; }
-		},
-
-		updateUserUI: function () {
-			$.view.$userContainer.toggleClass('inner', $.viewmodel.isAuth);
-		},
-
-		authorize: function () {
-			var context = this;
-			$.post(document['url_root'] + 'user/login', {'em': $('#em').val(), 'p': $('#p').val() }, null, 'json')
-				.done(function (data) {
-					$('#display-name').text(data.name);
-					$.viewmodel.isAuth = true;
-					context.updateUserUI();
-				})
-				.fail( function(xhr, textStatus, errorThrown) {
-					alert(xhr.status);
-					$.viewmodel.isAuth = false;
-					context.updateUserUI();
-				});
-		},
-
-		signOut: function () {
-			var context = this;
-			$.viewmodel.isAuth = false;
-			$.post(document['url_root'] + 'user/logout')
-				.done(function () {
-					context.updateUserUI();
-					$('#display-name').text('');
-				});
 		}
 	});
 })(jQuery);

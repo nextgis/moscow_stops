@@ -38,7 +38,7 @@
 				}
 			});
 			$.view.$document.on('/sm/editor/startEdit', function (e) {
-				context.startAjaxEdit();
+				context.startAjaxEdition();
 			});
 			$('#save').off('click').on('click', function (e) {
 				e.stopPropagation();
@@ -46,7 +46,7 @@
 			});
 			$('#discard').off('click').on('click', function (e) {
 				e.stopPropagation();
-				context.discard();
+				context.finishAjaxEdition();
 			});
 			$('#route_type').off('change').on('change', function (e) {
 				var newRouteType = e.target.value;
@@ -116,15 +116,11 @@
 				url: url,
 				data: { 'stop' : JSON.stringify(stop)}
 			}).done(function () {
-					context.finishEditing();
+					context.finishAjaxEdition();
 			});
 		},
 
-		discard: function () {
-			this.finishEditing();
-		},
-
-		startAjaxEdit: function () {
+		startAjaxEdition: function () {
 			var context = this;
 			$.ajax({
 				type: 'GET',
@@ -234,6 +230,16 @@
 
 		clearUIRoutes: function() {
 			$('#routes').importTags('');
+		},
+
+		finishAjaxEdition: function () {
+			var context = this;
+			$.ajax({
+				type: 'GET',
+				url: document['url_root'] + 'stop/unblock/' + $.viewmodel.stopSelected.id
+			}).done(function () {
+					context.finishEditing();
+				});
 		},
 
 		finishEditing: function () {

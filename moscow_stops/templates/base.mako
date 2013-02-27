@@ -56,19 +56,20 @@
 class="inner"
 % endif
 >
-	<form id="signInForm" class="form-inline">
-		<input id="em" type="email" class="input-small" placeholder="E-mail">
-		<input id="p" type="password" class="input-small" placeholder="Пароль">
-		<button type="button" class="btn btn-primary">Войти</button>
+	<form id="signInForm" class="form-inline" method="post">
+		<input id="em" type="email" class="input-small" name="mail" placeholder="E-mail">
+		<input id="p" type="password" class="input-small" name="pass" placeholder="Пароль">
+		<button type="submit" class="btn btn-primary">Войти</button>
 	</form>
-	<form id="signOutForm" class="form-inline">
+	<form id="signOutForm" class="form-inline" method="post">
 		<fieldset>
 			<label id="display-name" class="control-label">
 				% if u_name:
 						${u_name}
 				% endif
 			</label>
-			<button type="button" class="btn">Выйти</button>
+			<input type="hidden" name="sign_out" value="true" />
+			<button type="submit" class="btn">Выйти</button>
 		</fieldset>
 	</form>
 </div>
