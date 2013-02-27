@@ -7,7 +7,7 @@ from models import Stop
 from sqlalchemy.orm import joinedload
 import transaction
 from decorators import authorized
-
+from helpers import sql_generate_for_many_to_many, str_to_boolean
 import json
 
 @view_config(route_name='stops', request_method='GET')
@@ -101,7 +101,8 @@ def update_stop(context, request):
 		Stop.is_shelter : None if  stop['is_shelter'] == 'None' else stop['is_shelter'],
 		Stop.comment : stop['comment'].encode('UTF-8'),
 		Stop.panorama_link : stop['panorama_link'],
-		Stop.check_status : stop['is_check']
+		Stop.check_status : stop['is_check'],
+	    Stop.is_help : str_to_boolean(stop['is_help'])
 	}, synchronize_session=False);
 	# raw sql about https://groups.google.com/forum/?fromgroups=#!topic/geoalchemy/vSAlsuhwWfo
 	sql = 'UPDATE stops SET geom=GeomFromText(:wkt, 4326) WHERE id = :stop_id'
@@ -109,5 +110,11 @@ def update_stop(context, request):
 		'wkt' : 'POINT(%s %s)' % (stop['lon'], stop['lat']),
 		'stop_id' : stop['id']
 	})
+
+	sql_routes = sql_generate_for_many_to_many(session, stop['routes'], ['stop_id', 'route_id'], {'col' : 'stop_id', 'id' : stop['id']} , 'stops_routes', ['stop_id', 'route_id'])
+	if sql_routes:
+		session.execute(sql_routes)
+
 	transaction.commit()
-	return Response(json.dumps(stop))
+	# return Response(json.dumps(stop))
+	return Response(sql_routes)

@@ -107,7 +107,7 @@ class="inner"
 	<span class="icon-collapse"></span>
 	<div class="title"><span>Редактор</span></div>
 	<div class="form-wrap">
-		<form class="form-inline disabled">
+		<form class="form-inline disabled" id="editorForm">
 			<div class="group">
 				<label class="control-label middle" for="name">Название</label>
 				<input type="text" id="name" name="name" class="stand" disabled="disabled"/>
@@ -202,7 +202,8 @@ class="inner"
 				<input type="text" id="photo" class="stand" disabled="disabled"/>
 			</div>
 			<div class="group-checkboxes">
-				<input type="checkbox" id="is_help" name="is_help" class="stand" disabled/>
+				<input id="is_help" type="hidden" name="is_help" value="0">
+				<input type="checkbox" class="stand" disabled="disabled" data-id="is_help"/>
 				<label class="control-label top" for="is_help">Нужна помощь</label>
 			</div>
 			<div class="group-submit">

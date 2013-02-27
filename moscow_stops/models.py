@@ -29,22 +29,6 @@ from zope.sqlalchemy import ZopeTransactionExtension
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
-
-class User(Base):
-	__tablename__ = 'users'
-
-	id = Column(Integer, primary_key=True)
-	email = Column(Unicode(100), unique=True)
-	password = Column(Unicode(40), nullable=False)
-	display_name = Column(Unicode(100))
-
-	@classmethod
-	def password_hash(cls, password, salt):
-		return hashlib.sha1(password + salt).hexdigest()
-
-	def as_dict(self, **addon):
-		return dict(id=self.id, email=self.email, display_name=self.display_name, **addon)
-
 stopsRoutes = Table('stops_routes', Base.metadata,
                     Column('stop_id', Integer, ForeignKey('stops.id'), nullable=False, primary_key=True),
                     Column('route_id', Integer, ForeignKey('routes.id'), nullable=False, primary_key=True)
@@ -71,6 +55,7 @@ class Stop(Base):
 	is_block = Column(Boolean, nullable=True)
 	user_block = relationship('User')
 	user_block_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+	is_help = Column(Boolean, nullable=True, default=False)
 
 class StopType(Base):
 	__tablename__ = 'stop_types'
@@ -101,3 +86,18 @@ class LogStops(Base):
 	user = relationship('User')
 	user_id = Column(Integer, ForeignKey('users.id'), nullable=False, primary_key=True)
 	time = Column(DateTime, nullable=False, primary_key=True)
+
+class User(Base):
+	__tablename__ = 'users'
+
+	id = Column(Integer, primary_key=True)
+	email = Column(Unicode(100), unique=True)
+	password = Column(Unicode(40), nullable=False)
+	display_name = Column(Unicode(100))
+
+	@classmethod
+	def password_hash(cls, password, salt):
+		return hashlib.sha1(password + salt).hexdigest()
+
+	def as_dict(self, **addon):
+		return dict(id=self.id, email=self.email, display_name=self.display_name, **addon)

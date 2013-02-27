@@ -25,7 +25,7 @@ def home_view(request):
 		routes[route.route_type_id].append(route)
 
 	user_name = None
-	if 'cookies' in request.keys() and 'sk' in request.cookies.keys() and 'sk' in request.session and request.session['sk'] == request.cookies['sk'] and 'u_name' in request.session:
+	if hasattr(request, 'cookies') and 'sk' in request.cookies.keys() and 'sk' in request.session and request.session['sk'] == request.cookies['sk'] and 'u_name' in request.session:
 		user_name = request.session['u_name']
 	return {'u_name': user_name, 'routes' : routes, 'routes_types' : routes_types }
 
