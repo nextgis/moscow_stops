@@ -1250,6 +1250,15 @@
 				var $selectedOption = $('#route_type_' + $.viewmodel.routeTypeSelected).find(":selected");
 				context.addRoute($selectedOption.val(), $selectedOption.text());
 			});
+			$('#editorForm').find(':checkbox').off('click').on('click', function () {
+				var checkbox = $(this),
+					hidden = $('#' + checkbox.data('id'));
+					if(checkbox.is(':checked')) {
+						hidden.val(1);
+					} else {
+						hidden.val(0);
+					}
+			});
 		},
 
 		setDomOptions: function () {
@@ -1286,8 +1295,9 @@
 				data_serialized = frm.serializeArray(),
 				i = 0,
 				ds_length = data_serialized.length,
-				url = document['url_root'] + 'stop/' + $.viewmodel.stopSelected.id,
-				stop = { 'id' :  $.viewmodel.stopSelected.id },
+				stop_selected = $.viewmodel.stopSelected,
+				url = document['url_root'] + 'stop/' + stop_selected.id,
+				stop = { 'id' :  stop_selected.id },
 				name;
 			for (i; i < ds_length; i += 1) {
 				name = data_serialized[i].name;
@@ -1303,6 +1313,7 @@
 						break;
 				}
 			}
+			stop['routes'] = this.getRoutesToSave(stop_selected);
 			$.ajax({
 				type: 'POST',
 				url: url,
@@ -1310,6 +1321,18 @@
 			}).done(function () {
 					context.finishAjaxEdition();
 			});
+		},
+
+		getRoutesToSave: function (stop) {
+			var routes = stop.routes.routes,
+				count_routes = routes.length,
+				stop_id = stop.id,
+				i = 0,
+				saved_routes = [];
+			for (i; i < count_routes; i += 1) {
+				saved_routes.push({'stop_id' : stop_id, 'route_id' : routes[i].id });
+			}
+			return saved_routes;
 		},
 
 		startAjaxEdition: function () {
