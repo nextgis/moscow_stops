@@ -18,28 +18,20 @@
 
 		bindEvents: function () {
 			$.viewmodel.map.on('moveend', function (e) {
-				$.when($.view.$document.trigger('/sm/osm/updateOsmLayer'),
-					$.view.$document.trigger('/sm/stops/updateStops')).then(function () {
-						var s = $.viewmodel.mapLayers.select._layers,
-							smarker = s[Object.keys(s)[0]];
-						if (smarker && !$.viewmodel.isPopupOpened) {
-							smarker.openPopup();
-							$.viewmodel.isPopupOpened = true;
-							$.view.$document.trigger('/sm/map/openPopupEnd', [smarker]);
-						}
-					});
+				$.view.$document.trigger('/sm/map/updateAllLayers');
 			});
-			$.view.$document.on('/sm/map/openPopup', function (e, markerPopuped) {
+			$.view.$document.on('/sm/map/updateAllLayers', function () {
+				$.view.$document.trigger('/sm/osm/updateOsmLayer');
+				$.view.$document.trigger('/sm/stops/updateStops');
+			});
+			$.view.$document.on('/sm/map/openPopup', function (e, latlng, html) {
 				var vm = $.viewmodel,
-					s = vm.mapLayers.select,
-					m = $.extend(true, {}, markerPopuped);
-				s.clearLayers();
-				s.addLayer(m);
-				vm.map.panTo(markerPopuped._latlng);
-			});
-			$.view.$document.on('/sm/map/MarkerClick', function (e) {
-				$.viewmodel.mapLayers.select.clearLayers();
-				$.viewmodel.map.closePopup();
+					selectLayer = vm.mapLayers.select,
+					map = vm.map;
+//				map.closePopup();
+				map.panTo(latlng);
+				map.openPopup(L.popup().setLatLng(latlng).setContent(html));
+
 			});
 			$.viewmodel.map.on('popupclose', function () {
 				var vm = $.viewmodel;

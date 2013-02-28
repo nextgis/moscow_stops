@@ -18,8 +18,8 @@
 
 		bindEvents: function () {
 			var context = this;
-			$.view.$document.on('/sm/osm/updateOsmLayer', function (e, isCleared) {
-				context.updateOsmLayer(isCleared);
+			$.view.$document.on('/sm/osm/updateOsmLayer', function () {
+				context.updateOsmLayer();
 			});
 			$.viewmodel.map.on('zoomend', function (e) {
 				$.view.$document.trigger('/sm/osm/updateOsmLayer');
@@ -58,19 +58,23 @@
 				osmLayer = vm.mapLayers.osmStops,
 				icon = $.sm.map.getIcon('osm-bus-stop', 16),
 				marker;
+			vm.osmStops = {};
+			popupHtml = $.templates.stopPopupTemplate({
+				css: 'block'
+			});
 			for (var i = 0, stopsCount = stops.length; i < stopsCount; i++) {
 				vm.osmStops[stops[i].id] = stops[i];
-				marker = L.marker([stops[i].lat, stops[i].lon], {icon:icon}).on('click', function (e) {
-					$.view.$document.trigger('/sm/map/MarkerClick');
-					var marker = e.target,
-						stop = $.viewmodel.osmStops[marker.id_osm],
-						html = $.templates.osmPopupTemplate({
-							tags: $.sm.helpers.hashToArrayKeyValues(stop.tags),
-							id: stop.id,
-							link: 'http://www.openstreetmap.org/browse/node/' + stop.id
-						});
-						marker.bindPopup(html, {autoPan : false});
-						$.view.$document.trigger('/sm/map/openPopup', [marker]);
+				marker = L.marker([stops[i].lat, stops[i].lon], {icon:icon})
+					.on('click', function (e) {
+						$.view.$document.trigger('/sm/map/MarkerClick');
+						var marker = e.target,
+							stop = $.viewmodel.osmStops[marker.id_osm],
+							html = $.templates.osmPopupTemplate({
+								tags: $.sm.helpers.hashToArrayKeyValues(stop.tags),
+								id: stop.id,
+								link: 'http://www.openstreetmap.org/browse/node/' + stop.id
+							});
+							$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), html]);
 					});
 				marker['id_osm'] = stops[i].id;
 				osmLayer.addLayer(marker);

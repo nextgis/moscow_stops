@@ -1091,28 +1091,36 @@
 
 		bindEvents: function () {
 			$.viewmodel.map.on('moveend', function (e) {
-				$.when($.view.$document.trigger('/sm/osm/updateOsmLayer'),
-					$.view.$document.trigger('/sm/stops/updateStops')).then(function () {
-						var s = $.viewmodel.mapLayers.select._layers,
-							smarker = s[Object.keys(s)[0]];
-						if (smarker && !$.viewmodel.isPopupOpened) {
-							smarker.openPopup();
-							$.viewmodel.isPopupOpened = true;
-							$.view.$document.trigger('/sm/map/openPopupEnd', [smarker]);
-						}
-					});
+				$.view.$document.trigger('/sm/map/updateAllLayers');
 			});
-			$.view.$document.on('/sm/map/openPopup', function (e, markerPopuped) {
+			$.view.$document.on('/sm/map/updateAllLayers', function () {
+				$.view.$document.trigger('/sm/osm/updateOsmLayer');
+				$.view.$document.trigger('/sm/stops/updateStops');
+//				$.when($.view.$document.trigger('/sm/osm/updateOsmLayer'),
+//						$.view.$document.trigger('/sm/stops/updateStops')).then(function () {
+//						var s = $.viewmodel.mapLayers.select._layers,
+//							smarker = s[Object.keys(s)[0]];
+//						if (smarker && !$.viewmodel.isPopupOpened) {
+//							smarker.openPopup();
+//							$.viewmodel.isPopupOpened = true;
+//							$.view.$document.trigger('/sm/map/openPopupEnd', [smarker]);
+//						}
+//					});
+			});
+			$.view.$document.on('/sm/map/openPopup', function (e, latlng, html) {
 				var vm = $.viewmodel,
-					s = vm.mapLayers.select,
-					m = $.extend(true, {}, markerPopuped);
-				s.clearLayers();
-				s.addLayer(m);
-				vm.map.panTo(markerPopuped._latlng);
+					selectLayer = vm.mapLayers.select,
+					map = vm.map;
+//				map.closePopup();
+				map.panTo(latlng);
+				map.openPopup(L.popup().setLatLng(latlng).setContent(html));
+//				s.clearLayers();
+//				s.addLayer(m);
+
 			});
 			$.view.$document.on('/sm/map/MarkerClick', function (e) {
-				$.viewmodel.mapLayers.select.clearLayers();
-				$.viewmodel.map.closePopup();
+//				$.viewmodel.mapLayers.select.clearLayers();
+//				$.viewmodel.map.closePopup();
 			});
 			$.viewmodel.map.on('popupclose', function () {
 				var vm = $.viewmodel;
@@ -1461,6 +1469,7 @@
 			var vd = $.view.$document,
 				vm = $.viewmodel,
 				v = $.view;
+			vm.map.closePopup();
 			vm.mapLayers['edit'].clearLayers();
 			vm.editable = false;
 			v.$body.addClass('editable');
@@ -1469,8 +1478,9 @@
 			v.$editorContainer.find('input, select, textarea, button').attr('disabled', 'disabled');
 			v.$editorContainer.find('form').addClass('disabled');
 			$('#routes').importTags('');
-			vd.trigger('/sm/osm/updateOsmLayer');
-			vd.trigger('/sm/stops/updateStops')
+			$.view.$document.trigger('/sm/map/updateAllLayers');
+//			vd.trigger('/sm/osm/updateOsmLayer');
+//			vd.trigger('/sm/stops/updateStops');
 		}
 	});
 })(jQuery);
@@ -1495,8 +1505,8 @@
 
 		bindEvents: function () {
 			var context = this;
-			$.view.$document.on('/sm/osm/updateOsmLayer', function (e, isCleared) {
-				context.updateOsmLayer(isCleared);
+			$.view.$document.on('/sm/osm/updateOsmLayer', function () {
+				context.updateOsmLayer();
 			});
 			$.viewmodel.map.on('zoomend', function (e) {
 				$.view.$document.trigger('/sm/osm/updateOsmLayer');
@@ -1535,19 +1545,23 @@
 				osmLayer = vm.mapLayers.osmStops,
 				icon = $.sm.map.getIcon('osm-bus-stop', 16),
 				marker;
+			vm.osmStops = {};
+			popupHtml = $.templates.stopPopupTemplate({
+				css: 'block'
+			});
 			for (var i = 0, stopsCount = stops.length; i < stopsCount; i++) {
 				vm.osmStops[stops[i].id] = stops[i];
-				marker = L.marker([stops[i].lat, stops[i].lon], {icon:icon}).on('click', function (e) {
-					$.view.$document.trigger('/sm/map/MarkerClick');
-					var marker = e.target,
-						stop = $.viewmodel.osmStops[marker.id_osm],
-						html = $.templates.osmPopupTemplate({
-							tags: $.sm.helpers.hashToArrayKeyValues(stop.tags),
-							id: stop.id,
-							link: 'http://www.openstreetmap.org/browse/node/' + stop.id
-						});
-						marker.bindPopup(html, {autoPan : false});
-						$.view.$document.trigger('/sm/map/openPopup', [marker]);
+				marker = L.marker([stops[i].lat, stops[i].lon], {icon:icon})
+					.on('click', function (e) {
+						$.view.$document.trigger('/sm/map/MarkerClick');
+						var marker = e.target,
+							stop = $.viewmodel.osmStops[marker.id_osm],
+							html = $.templates.osmPopupTemplate({
+								tags: $.sm.helpers.hashToArrayKeyValues(stop.tags),
+								id: stop.id,
+								link: 'http://www.openstreetmap.org/browse/node/' + stop.id
+							});
+							$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), html]);
 					});
 				marker['id_osm'] = stops[i].id;
 				osmLayer.addLayer(marker);
@@ -1609,29 +1623,7 @@
 				context.updateStops(isCleared);
 			});
 			$.view.$document.off('/sm/map/openPopupEnd').on('/sm/map/openPopupEnd', function (marker) {
-				$.getJSON(document['url_root'] + 'stop/' + $.viewmodel.stopSelectedId, function (data) {
-					$.viewmodel.stopSelected = data.stop;
-					var helper = $.sm.helpers,
-						html = $.templates.stopPopupInfoTemplate({
-							id: data.stop.id,
-							name: data.stop.name,
-							is_shelter: helper.boolToString(data.stop.is_shelter),
-							is_bench: helper.boolToString(data.stop.is_bench),
-							stop_type_id: helper.valueNullToString(data.stop.stop_type_id),
-							routes: data.stop.routes,
-							types: data.stop.types,
-							check_status: helper.valueCheckToString(data.stop.check_status),
-							comment: helper.valueNullToString(data.stop.comment),
-							isUserEditor: $.viewmodel.isAuth,
-							editDenied: $.viewmodel.editable
-						});
-					$('#stop-popup').removeClass('loader').empty().append(html);
-					$('button#edit').off('click').on('click', function (e) {
-						$.view.$document.trigger('/sm/editor/startEdit');
-					});
-				}).error(function () {
-						$('#stop-popup').removeClass('loader').empty().append('Error connection');
-					});
+
 			});
 		},
 
@@ -1675,20 +1667,20 @@
 				iconBlock = mp.getIcon('stop-block', 20),
 				iconEdit = mp.getIcon('stop-edit', 20),
 				iconCheck = mp.getIcon('stop-check', 20),
-				stopsIterable, stop, marker, popupHtml;
+				stopsIterable, stop, marker, popupHtml,
+				htmlPopup = $.templates.stopPopupTemplate({ css: 'edit' }),
+				context = this;
 
 			stopsIterable = data.stops.block;
 			for (stop in stopsIterable) {
 				if (stopsIterable.hasOwnProperty(stop)) {
-					popupHtml = $.templates.stopPopupTemplate({
-						css: 'block'
-					});
 					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconBlock})
-						.bindPopup(popupHtml, {autoPan: false})
-						.off('click').on('click', function (e) {
-							$.viewmodel.stopSelectedId = marker.stop_id;
-							$.view.$document.trigger('/sm/map/openPopup', [marker]);
+						.on('click', function (e) {
+							var marker = e.target;
+							$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
+							context.buildStopPopup(marker.stop_id);
 						});
+					marker['stop_id'] = stop;
 					stopsLayer.addLayer(marker);
 				}
 			}
@@ -1696,15 +1688,13 @@
 			stopsIterable = data.stops.non_block.non_check;
 			for (stop in stopsIterable) {
 				if (stopsIterable.hasOwnProperty(stop)) {
-					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconEdit}).on('click', function (e) {
-						$.view.$document.trigger('/sm/map/MarkerClick');
-						var marker = e.target;
-						marker.bindPopup($.templates.stopPopupTemplate({ css: 'edit' }), {autoPan: false});
-						$.viewmodel.stopSelectedId = marker.stop_id;
-						$.view.$document.trigger('/sm/map/openPopup', [marker]);
+					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconEdit})
+						.on('click', function (e) {
+							var marker = e.target;
+							$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
+							context.buildStopPopup(marker.stop_id);
 					});
 					marker['stop_id'] = stop;
-
 					stopsLayer.addLayer(marker);
 				}
 			}
@@ -1713,21 +1703,42 @@
 			for (stop in stopsIterable) {
 				if (stopsIterable.hasOwnProperty(stop)) {
 					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconEdit}).on('click', function (e) {
-						$.view.$document.trigger('/sm/map/MarkerClick');
 						var marker = e.target;
-						marker.bindPopup($.templates.stopPopupTemplate({ css: 'edit' }), {autoPan: false});
-						$.viewmodel.stopSelectedId = marker.stop_id;
-						$.view.$document.trigger('/sm/map/openPopup', [marker]);
+						$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
+						context.buildStopPopup(marker.stop_id);
 					});
 					marker['stop_id'] = stop;
-
 					stopsLayer.addLayer(marker);
 				}
 			}
 		},
 
-		renderStop: function () {
-
+		buildStopPopup: function (stopId) {
+			return $.getJSON(document['url_root'] + 'stop/' + stopId,function (data) {
+				$.viewmodel.stopSelected = data.stop;
+				var helper = $.sm.helpers,
+					html = $.templates.stopPopupInfoTemplate({
+						id: data.stop.id,
+						name: data.stop.name,
+						is_shelter: helper.boolToString(data.stop.is_shelter),
+						is_bench: helper.boolToString(data.stop.is_bench),
+						stop_type_id: helper.valueNullToString(data.stop.stop_type_id),
+						routes: data.stop.routes,
+						types: data.stop.types,
+						check_status: helper.valueCheckToString(data.stop.check_status),
+						comment: helper.valueNullToString(data.stop.comment),
+						isUserEditor: $.viewmodel.isAuth,
+						editDenied: $.viewmodel.editable || data.stop.is_block,
+						isBlock: data.stop.is_block,
+						userBlock: data.stop.user_block
+					});
+				$('#stop-popup').removeClass('loader').empty().append(html);
+				$('button#edit').off('click').on('click', function (e) {
+					$.view.$document.trigger('/sm/editor/startEdit');
+				});
+			}).error(function () {
+					$('#stop-popup').removeClass('loader').empty().append('Error connection');
+				});
 		},
 
 		validateZoom: function () {

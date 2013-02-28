@@ -471,6 +471,14 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 	background: url('../img/sm-icons.png') -25px -165px;
 }
 
+#map .stop-block {
+	background: url('../img/sm-icons.png') -80px -145px;
+}
+
+#map .stop-block:hover {
+	background: url('../img/sm-icons.png') -100px -145px;
+}
+
 #stop-popup.loader {
 	width: 250px;
 	height: 100px;
@@ -498,6 +506,17 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 
 #stop-popup #edit {
 	padding: 5px;
+}
+
+#stop-popup tr.block {
+	color: red;
+	font-weight: bold;
+}
+
+#stop-popup div.edit button.block {
+	color: #ffdbd6;
+	background-color: #cc8774;
+	background-image: none;
 }
 
 #map .osm-popup table {

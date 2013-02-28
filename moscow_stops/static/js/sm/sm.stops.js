@@ -21,29 +21,7 @@
 				context.updateStops(isCleared);
 			});
 			$.view.$document.off('/sm/map/openPopupEnd').on('/sm/map/openPopupEnd', function (marker) {
-				$.getJSON(document['url_root'] + 'stop/' + $.viewmodel.stopSelectedId, function (data) {
-					$.viewmodel.stopSelected = data.stop;
-					var helper = $.sm.helpers,
-						html = $.templates.stopPopupInfoTemplate({
-							id: data.stop.id,
-							name: data.stop.name,
-							is_shelter: helper.boolToString(data.stop.is_shelter),
-							is_bench: helper.boolToString(data.stop.is_bench),
-							stop_type_id: helper.valueNullToString(data.stop.stop_type_id),
-							routes: data.stop.routes,
-							types: data.stop.types,
-							check_status: helper.valueCheckToString(data.stop.check_status),
-							comment: helper.valueNullToString(data.stop.comment),
-							isUserEditor: $.viewmodel.isAuth,
-							editDenied: $.viewmodel.editable
-						});
-					$('#stop-popup').removeClass('loader').empty().append(html);
-					$('button#edit').off('click').on('click', function (e) {
-						$.view.$document.trigger('/sm/editor/startEdit');
-					});
-				}).error(function () {
-						$('#stop-popup').removeClass('loader').empty().append('Error connection');
-					});
+
 			});
 		},
 
@@ -87,20 +65,20 @@
 				iconBlock = mp.getIcon('stop-block', 20),
 				iconEdit = mp.getIcon('stop-edit', 20),
 				iconCheck = mp.getIcon('stop-check', 20),
-				stopsIterable, stop, marker, popupHtml;
+				stopsIterable, stop, marker, popupHtml,
+				htmlPopup = $.templates.stopPopupTemplate({ css: 'edit' }),
+				context = this;
 
 			stopsIterable = data.stops.block;
 			for (stop in stopsIterable) {
 				if (stopsIterable.hasOwnProperty(stop)) {
-					popupHtml = $.templates.stopPopupTemplate({
-						css: 'block'
-					});
 					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconBlock})
-						.bindPopup(popupHtml, {autoPan: false})
-						.off('click').on('click', function (e) {
-							$.viewmodel.stopSelectedId = marker.stop_id;
-							$.view.$document.trigger('/sm/map/openPopup', [marker]);
+						.on('click', function (e) {
+							var marker = e.target;
+							$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
+							context.buildStopPopup(marker.stop_id);
 						});
+					marker['stop_id'] = stop;
 					stopsLayer.addLayer(marker);
 				}
 			}
@@ -108,15 +86,13 @@
 			stopsIterable = data.stops.non_block.non_check;
 			for (stop in stopsIterable) {
 				if (stopsIterable.hasOwnProperty(stop)) {
-					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconEdit}).on('click', function (e) {
-						$.view.$document.trigger('/sm/map/MarkerClick');
-						var marker = e.target;
-						marker.bindPopup($.templates.stopPopupTemplate({ css: 'edit' }), {autoPan: false});
-						$.viewmodel.stopSelectedId = marker.stop_id;
-						$.view.$document.trigger('/sm/map/openPopup', [marker]);
+					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconEdit})
+						.on('click', function (e) {
+							var marker = e.target;
+							$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
+							context.buildStopPopup(marker.stop_id);
 					});
 					marker['stop_id'] = stop;
-
 					stopsLayer.addLayer(marker);
 				}
 			}
@@ -125,21 +101,42 @@
 			for (stop in stopsIterable) {
 				if (stopsIterable.hasOwnProperty(stop)) {
 					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconEdit}).on('click', function (e) {
-						$.view.$document.trigger('/sm/map/MarkerClick');
 						var marker = e.target;
-						marker.bindPopup($.templates.stopPopupTemplate({ css: 'edit' }), {autoPan: false});
-						$.viewmodel.stopSelectedId = marker.stop_id;
-						$.view.$document.trigger('/sm/map/openPopup', [marker]);
+						$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
+						context.buildStopPopup(marker.stop_id);
 					});
 					marker['stop_id'] = stop;
-
 					stopsLayer.addLayer(marker);
 				}
 			}
 		},
 
-		renderStop: function () {
-
+		buildStopPopup: function (stopId) {
+			return $.getJSON(document['url_root'] + 'stop/' + stopId,function (data) {
+				$.viewmodel.stopSelected = data.stop;
+				var helper = $.sm.helpers,
+					html = $.templates.stopPopupInfoTemplate({
+						id: data.stop.id,
+						name: data.stop.name,
+						is_shelter: helper.boolToString(data.stop.is_shelter),
+						is_bench: helper.boolToString(data.stop.is_bench),
+						stop_type_id: helper.valueNullToString(data.stop.stop_type_id),
+						routes: data.stop.routes,
+						types: data.stop.types,
+						check_status: helper.valueCheckToString(data.stop.check_status),
+						comment: helper.valueNullToString(data.stop.comment),
+						isUserEditor: $.viewmodel.isAuth,
+						editDenied: $.viewmodel.editable || data.stop.is_block,
+						isBlock: data.stop.is_block,
+						userBlock: data.stop.user_block
+					});
+				$('#stop-popup').removeClass('loader').empty().append(html);
+				$('button#edit').off('click').on('click', function (e) {
+					$.view.$document.trigger('/sm/editor/startEdit');
+				});
+			}).error(function () {
+					$('#stop-popup').removeClass('loader').empty().append('Error connection');
+				});
 		},
 
 		validateZoom: function () {

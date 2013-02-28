@@ -31,11 +31,16 @@
 		<td>Комментарий</td>
 		<td>{{comment}}</td>
 	</tr>
+	{{#isBlock}}
+	<tr class="block">
+		<td>Заблокировал</td>
+		<td>{{userBlock}}</td>
+	</tr>
+	{{/isBlock}}
 </table>
 {{#isUserEditor}}
 <div class="edit">
-	<button class="btn btn-small btn-primary" id="edit" type="button" {{#editDenied}}disabled="disabled"{{/editDenied}}>Редактировать</button>
-	<!--<a class="{{#editable}}allow{{/editable}}"></a>-->
+	<button class="btn btn-small btn-primary {{#isBlock}}block{{/isBlock}}" id="edit" type="button" {{#editDenied}}disabled="disabled"{{/editDenied}}>Редактировать</button>
 </div>
 {{/isUserEditor}}
 

@@ -269,6 +269,7 @@
 			var vd = $.view.$document,
 				vm = $.viewmodel,
 				v = $.view;
+			vm.map.closePopup();
 			vm.mapLayers['edit'].clearLayers();
 			vm.editable = false;
 			v.$body.addClass('editable');
@@ -277,8 +278,7 @@
 			v.$editorContainer.find('input, select, textarea, button').attr('disabled', 'disabled');
 			v.$editorContainer.find('form').addClass('disabled');
 			$('#routes').importTags('');
-			vd.trigger('/sm/osm/updateOsmLayer');
-			vd.trigger('/sm/stops/updateStops')
+			$.view.$document.trigger('/sm/map/updateAllLayers');
 		}
 	});
 })(jQuery);

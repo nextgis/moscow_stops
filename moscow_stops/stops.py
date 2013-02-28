@@ -46,7 +46,7 @@ def get(context, request):
 def get_stop(context, request):
 	id = request.matchdict.get('id', None)
 	session = DBSession()
-	stop_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).options(joinedload(Stop.stop_types), joinedload(Stop.routes)).filter(Stop.id == id).one()
+	stop_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).options(joinedload(Stop.stop_types), joinedload(Stop.routes), joinedload(Stop.user_block)).filter(Stop.id == id).one()
 
 	stops_result = {'stop': {}}
 	for col in stop_from_db[0].__table__.columns.keys():
@@ -66,6 +66,10 @@ def get_stop(context, request):
 	for type in stop_types:
 		stop_types_res.append(dict((col, getattr(stop_type, col)) for stop_type in type.__table__.columns.keys()))
 	stops_result['stop']['types'] = stop_types
+
+	stops_result['stop']['user_block'] = ''
+	if stop_from_db[0].is_block:
+		stops_result['stop']['user_block'] = stop_from_db[0].user_block.display_name
 
 	return Response(json.dumps(stops_result))
 
