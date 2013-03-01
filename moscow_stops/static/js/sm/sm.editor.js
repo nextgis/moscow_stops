@@ -122,6 +122,7 @@
 				}
 			}
 			stop['routes'] = this.getRoutesToSave(stop_selected);
+			stop['stop_types'] = this.getStopTypes(stop_selected);
 			$.ajax({
 				type: 'POST',
 				url: url,
@@ -141,6 +142,20 @@
 				saved_routes.push({'stop_id' : stop_id, 'route_id' : routes[i].id });
 			}
 			return saved_routes;
+		},
+
+		getStopTypes: function (stop) {
+			var stop_id = stop.id;
+			if ($('#stype_0').is(':checked')) {
+				return [{'stop_id' : stop_id, 'stop_type_id' : 0 }];
+			} else {
+				var result = [];
+				$('#types .parameter.sub input:checked').each(function () {
+					result.push({'stop_id' : stop_id, 'stop_type_id' : $(this).data('id') });
+
+				});
+				return result;
+			}
 		},
 
 		startAjaxEdition: function () {
@@ -170,7 +185,40 @@
 			});
 			vm.mapLayers['edit'].addLayer(marker);
 			this.fillEditor(vm.stopSelected);
+			this.bindEventsForTypes();
+			$('#chb_is_help').off('change').on('change', function () {
+				if (this.checked) {
+					$('#is_help').val(1);
+				} else {
+					$('#is_help').val(0);
+				}
+			});
 			vm.map.closePopup();
+		},
+
+		bindEventsForTypes: function () {
+			var v = $.view;
+			$('#stype_0').off('change').on('change', function () {
+				if (this.checked) {
+					$('#types .parameters input').not('#stype_0').prop('checked', false).not('#other_stype').prop('disabled', true);
+					$('#types .parameter.sub label').addClass('disabled');
+				} else {
+					$('#types .parameters input').not('#stype_0').prop('disabled', false);
+					$('#other_stype').prop('checked', true);
+					$('#types .parameter.sub label').removeClass('disabled');
+				}
+			});
+			$('#other_stype').off('change').on('change', function () {
+				if (this.checked) {
+					$('#types .parameters input').prop('disabled', false);
+					$('#stype_0').prop('checked', false);
+					$('#types .parameter.sub label').removeClass('disabled');
+				} else {
+					$('#stype_0').prop('checked', true);
+					$('#types .parameters input').not('#stype_0').prop('checked', false).not('#other_stype').prop('disabled', true);
+					$('#types .parameter.sub label').addClass('disabled');
+				}
+			});
 		},
 
 		fillEditor: function (stop) {
@@ -183,11 +231,31 @@
 			for (var i = 0, tl = stop.types.length; i < tl; i += 1) {
 				$('#stype_' + stop.types[i].id).prop('checked', true);
 			}
+			if (stop.types.length > 0 && stop.types[0].id == 0) {
+				$('#types .parameters input').not('#stype_0').prop('checked', false).not('#other_stype').prop('disabled', true);
+				$('#types .parameter.sub label').addClass('disabled');
+			} else if (stop.types.length > 0 && stop.types[0].id != 0) {
+				$('#types .parameters input').not('#stype_0').prop('disabled', false);
+				$('#other_stype').prop('checked', true);
+				$('#types .parameter.sub label').removeClass('disabled');
+			} else {
+				$('#types .parameter.sub label').addClass('disabled');
+				$('#types .parameter.sub input').prop('disabled', true);
+			}
 			$('#is_shelter').val(helpers.boolToString(stop.is_shelter, true));
 			$('#is_bench').val(helpers.boolToString(stop.is_bench, true));
 			$('#pan_link').val(helpers.valueNullToString(stop.panorama_link));
 			$('#comment').val(helpers.valueNullToString(stop.comment));
 			$('#is_check').val(stop.is_check);
+
+			if (stop.is_help) {
+				$('#is_help').val(1);
+				$('#chb_is_help').prop('checked', true);
+			} else {
+				$('#is_help').val(0);
+				$('#chb_is_help').prop('checked', false);
+			}
+
 		},
 
 		fillRoutes: function (routes) {

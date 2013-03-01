@@ -148,23 +148,27 @@ class="inner"
 					<option value="false">Нет</option>
 				</select>
 			</div>
-			<div class="group">
+			<div class="group" id="types">
 				<label class="control-label top">Тип остановки</label>
 				<div class="parameters">
 					<div class="parameter default">
 						<input type="checkbox" id="stype_0" disabled="disabled">
-						<label class="control-label" for="stype_0">Обычная</label>
+						<label class="control-label" for="stype_0">Промежуточная</label>
 					</div>
 					<div class="parameter">
-						<input type="checkbox" id="stype_1" disabled="disabled">
-						<label class="control-label" for="stype_1">Высадка</label>
+						<input type="checkbox" id="other_stype" disabled="disabled">
+						<label class="control-label" for="other_stype">Конечная</label>
 					</div>
-					<div class="parameter">
-						<input type="checkbox" id="stype_2" disabled="disabled">
+					<div class="parameter sub">
+						<input type="checkbox" id="stype_1" data-id="1" disabled="disabled">
+						<label class="control-label" for="stype_1" >Высадка</label>
+					</div>
+					<div class="parameter sub">
+						<input type="checkbox" id="stype_2" data-id="2" disabled="disabled">
 						<label class="control-label" for="stype_2">Посадка</label>
 					</div>
-					<div class="parameter">
-						<input type="checkbox" id="stype_3" disabled="disabled">
+					<div class="parameter sub">
+						<input type="checkbox" id="stype_3" data-id="3" disabled="disabled">
 						<label class="control-label" for="stype_3">Конечная</label>
 					</div>
 				</div>
@@ -194,7 +198,7 @@ class="inner"
 			</div>
 			<div class="group-checkboxes">
 				<input id="is_help" type="hidden" name="is_help" value="0">
-				<input type="checkbox" class="stand" disabled="disabled" data-id="is_help"/>
+				<input id="chb_is_help"  type="checkbox" class="stand" disabled="disabled" data-id="is_help"/>
 				<label class="control-label top" for="is_help">Нужна помощь</label>
 			</div>
 			<div class="group-submit">

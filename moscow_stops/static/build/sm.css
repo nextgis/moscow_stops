@@ -551,9 +551,17 @@ body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
 	width: 197px;
 }
 
+#editorContainer .parameter label.disabled {
+	color: #808080;
+}
+
 #editorContainer .parameter.default {
 	border-bottom: 1px solid #a9a9a9;
 	padding-bottom: 5px;
+}
+
+#editorContainer .parameter.sub {
+	margin-left: 10px;
 }
 
 #editorContainer .parameters .parameter input,

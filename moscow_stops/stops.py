@@ -53,9 +53,9 @@ def get(context, request):
 			stops_result['stops']['block']['count'] += 1
 		else:
 			if stop[0].is_bench is None \
-				and stop[0].is_shelter is None \
-				and len(stop[0].stop_types) == 0 \
-				and stop[0].panorama_link is None:
+				or stop[0].is_shelter is None \
+				or len(stop[0].stop_types) == 0 \
+				or stop[0].panorama_link is None:
 				stops_result['stops']['non_block']['non_check']['elements'].append(stop_entity)
 				stops_result['stops']['non_block']['non_check']['count'] += 1
 			else:
@@ -85,9 +85,9 @@ def get_stop(context, request):
 
 	stop_types = stop_from_db[0].stop_types
 	stop_types_res = []
-	for type in stop_types:
-		stop_types_res.append(dict((col, getattr(stop_type, col)) for stop_type in type.__table__.columns.keys()))
-	stops_result['stop']['types'] = stop_types
+	for stop_type in stop_types:
+		stop_types_res.append(dict((col, getattr(stop_type, col)) for col in stop_type.__table__.columns.keys()))
+	stops_result['stop']['types'] = stop_types_res
 
 	stops_result['stop']['user_block'] = ''
 	if stop_from_db[0].is_block:
@@ -140,6 +140,10 @@ def update_stop(context, request):
 	sql_routes = sql_generate_for_many_to_many(session, stop['routes'], ['stop_id', 'route_id'], {'col' : 'stop_id', 'id' : stop['id']} , 'stops_routes', ['stop_id', 'route_id'])
 	if sql_routes:
 		session.execute(sql_routes)
+
+	sql_types = sql_generate_for_many_to_many(session, stop['stop_types'], ['stop_id', 'stop_type_id'], {'col' : 'stop_id', 'id' : stop['id']} , 'stops_stop_types', ['stop_id', 'stop_type_id'])
+	if sql_types:
+		session.execute(sql_types)
 
 	transaction.commit()
 	# return Response(json.dumps(stop))

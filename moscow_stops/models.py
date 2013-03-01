@@ -55,12 +55,12 @@ class Stop(Base):
 	is_block = Column(Boolean, nullable=True)
 	user_block = relationship('User')
 	user_block_id = Column(Integer, ForeignKey('users.id'), nullable=True)
-	is_help = Column(Boolean, nullable=True, default=False)
+	is_help = Column(Boolean, nullable=True)
 
 class StopType(Base):
 	__tablename__ = 'stop_types'
 
-	id = Column(Integer, Sequence('stop_types_seq'), primary_key=True)
+	id = Column(Integer, primary_key=True)
 	name = Column(Unicode(254))
 
 class Route(Base):
