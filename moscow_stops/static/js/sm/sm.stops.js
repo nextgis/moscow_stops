@@ -41,6 +41,7 @@
 			var validateZoom = this.validateZoom();
 			$.viewmodel.mapLayers.stops.clearLayers();
 			if (!validateZoom) { return; }
+			$.view.$document.trigger('/sm/stops/startUpdate');
 			this.updateStopsByAjax();
 		},
 
@@ -59,6 +60,7 @@
 				success: function(data) {
 					context.renderStops(data);
 					$.view.$document.trigger('/sm/searcher/update');
+					$.view.$document.trigger('/sm/stops/endUpdate');
 				},
 				context: context
 			});

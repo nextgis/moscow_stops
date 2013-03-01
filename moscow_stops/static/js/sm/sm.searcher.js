@@ -33,10 +33,10 @@
 				context.keyUpHandler(e);
 			});
 			$('#filter_name, #filter_id').off('focus').on('focus', function () {
-				$.view.$searchResults.removeClass('active');
+				$.view.$searchResults.prop('class', 'description');
 			});
 			$('#searchResults p.description').off('click').on('click', function () {
-				$.view.$searchResults.addClass('active');
+				$.view.$searchResults.prop('class', 'active');
 			});
 			$.view.$searchButton.off('click').on('click', function () {
 				if ($.viewmodel.isFilterValidated) {
@@ -45,6 +45,18 @@
 			});
 			$.view.$document.on('/sm/searcher/update', function () {
 				context.updateSearch();
+			});
+			$.view.$document.on('/sm/stops/startUpdate', function () {
+				var v = $.view;
+				v.$searchResults.prop('class', 'update');
+				v.$filterName.prop('disabled', true);
+				v.$filterId.prop('disabled', true);
+			});
+			$.view.$document.on('/sm/stops/endUpdate', function () {
+				var v = $.view;
+				v.$searchResults.prop('class', 'active');
+				v.$filterName.prop('disabled', false);
+				v.$filterId.prop('disabled', false);
 			});
 		},
 
@@ -130,7 +142,8 @@
 				$.viewmodel.map.setView(new L.LatLng($li.data('lat'), $li.data('lon')), 18);
 				$('#target').show().delay(1000).fadeOut(1000);
 			});
-			$.view.$searchResults.addClass('active');
+			$.view.$searchResults.prop('class', 'active');
+//			$.view.$searchResults.addClass('active');
 		},
 
 		getHtmlForSearchResults: function (cssClass, stops) {

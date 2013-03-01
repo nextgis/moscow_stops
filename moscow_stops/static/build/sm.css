@@ -277,19 +277,20 @@ body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
 	text-align: center;
 }
 
-#searchResults p.description {
+#searchResults.description p.update,
+#searchResults.description ul,
+#searchResults.update div ul,
+#searchResults.update p.description,
+#searchResults.active p.description,
+#searchResults.active p.update {
+	display: none;
+}
+
+#searchResults.description p.description,
+#searchResults.update p.update {
 	display: inline;
 	color: #b2b1a6;
 	text-align: center;
-}
-
-#searchResults.active p.description {
-	display: none;
-}
-
-#searchResults ul {
-	display: none;
-
 }
 
 #searchResults.active ul {
@@ -302,10 +303,6 @@ body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
 #searchResults.active ul li {
 	margin-left: 5px;
 	color: #676767;
-}
-
-#searchResults.active ul li:hover {
-
 }
 
 #searchResults.active ul li:hover a {

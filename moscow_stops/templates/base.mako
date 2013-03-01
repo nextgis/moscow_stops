@@ -86,7 +86,8 @@ class="inner"
 			</div>
 		</fieldset>
 	</form>
-	<div id="searchResults" class="">
+	<div id="searchResults" class="active">
+		<p class="update">Запрос данных...</p>
 		<p class="description">Для поиска введите</br>название остановки (более 3 символов)</br>или ее ID (только цифры)</br>и нажмите на кнопку</br></br>
 			Для отображения списка остановок кликните на эту область
 		</p>
