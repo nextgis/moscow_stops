@@ -230,6 +230,11 @@ body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
 	width: 95px;
 }
 
+#filter_name.invalid,
+#filter_id.invalid {
+	border: 1px solid red;
+}
+
 #search {
 	display: inline-block;
 	border-radius: 4px 4px 4px 4px;

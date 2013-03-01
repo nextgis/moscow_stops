@@ -1152,7 +1152,8 @@
 })(jQuery);(function ($) {
 	$.extend($.viewmodel, {
 		searcherCollapsed: false,
-		filter: {'id' : '', 'name' : ''}
+		filter: {'id' : '', 'name' : ''},
+		isFilterValidated: false
 	});
 	$.extend($.view, {
 		$searchContainer: null,
@@ -1176,15 +1177,11 @@
 				$.viewmodel.searcherCollapsed = !$.viewmodel.searcherCollapsed;
 				$.view.$body.toggleClass('searcher-collapsed', context.searcherCollapsed);
 			});
-			$.view.$filterName.off('keyup').on('keyup', function () {
-				var isValid = context.validateSearch($.view.$filterId.val(), $(this).val());
-				context.updateUI(isValid);
-				context.updateFilter(isValid);
+			$.view.$filterName.off('keyup').on('keyup', function (e) {
+				context.keyUpHandler(e);
 			});
-			$.view.$filterId.off('keyup').on('keyup', function () {
-				var isValid = context.validateSearch($(this).val(), $.view.$filterName.val());
-				context.updateUI(isValid);
-				context.updateFilter(isValid);
+			$.view.$filterId.off('keyup').on('keyup', function (e) {
+				context.keyUpHandler(e);
 			});
 			$('#filter_name, #filter_id').off('focus').on('focus', function () {
 				$.view.$searchResults.removeClass('active');
@@ -1193,8 +1190,8 @@
 				$.view.$searchResults.addClass('active');
 			});
 			$.view.$searchButton.off('click').on('click', function () {
-				if ($(this).hasClass('active')) {
-					context.search();
+				if ($.viewmodel.isFilterValidated) {
+					context.applyFilter();
 				}
 			});
 			$.view.$document.on('/sm/searcher/update', function () {
@@ -1211,40 +1208,64 @@
 
 		},
 
-		validateSearch: function (id, name) {
+		validateSearch: function () {
 			var intRegex = /^\d+$/,
 				min_characters_name = this.min_characters_name,
-				$v = $.view,
-				id = id || $v.$filterId.val(),
-				name = name || $v.$filterName.val();
+				v = $.view,
+				vm = $.viewmodel,
+				id = v.$filterId.val(),
+				name = v.$filterName.val();
+
+			if (name.length <= min_characters_name && name != '') {
+				v.$filterName.addClass('invalid');
+			} else {
+				v.$filterName.removeClass('invalid');
+			}
+
+			if (!intRegex.test(id) && id != '') {
+				v.$filterId.addClass('invalid');
+			} else {
+				v.$filterId.removeClass('invalid')
+			}
+
 			if ((name.length > min_characters_name && id == '') ||
 				((name == '' || name.length <= min_characters_name)  && intRegex.test(id)) ||
-				(name.length > min_characters_name && intRegex.test(id))) {
-				return true;
+				(name.length > min_characters_name && intRegex.test(id)) ||
+				(name == '' && id == '' )) {
+				vm.isFilterValidated = true;
 			} else {
-				return false;
+				vm.isFilterValidated = false;
 			}
 		},
 
-		updateUI: function (isValid) {
-			$.view.$searchButton.toggleClass('active', isValid);
+		updateUI: function () {
+			$.view.$searchButton.toggleClass('active', $.viewmodel.isFilterValidated);
 		},
 
 		search: function () {
-			this.updateFilter(this.validateSearch());
 			$.view.$document.trigger('/sm/stops/updateStops');
 		},
 
-		updateFilter: function (isValid) {
+		applyFilter: function () {
+			if ($.viewmodel.isFilterValidated) {
+				this.updateFilter();
+				this.search();
+			}
+		},
+
+		keyUpHandler: function (e) {
+			this.validateSearch();
+			this.updateUI();
+			if(e.keyCode == 13) {
+				this.applyFilter();
+			}
+		},
+
+		updateFilter: function () {
 			var $v = $.view,
 				vm = $.viewmodel;
-			if (isValid) {
-				vm.filter.name = $v.$filterName.val(),
+				vm.filter.name = $v.$filterName.val();
 				vm.filter.id = $v.$filterId.val();
-			} else {
-				vm.filter = {'id' : '', 'name' : ''};
-			}
-
 		},
 
 		updateSearch: function () {
@@ -1782,7 +1803,7 @@
 			stopsIterableLength = data.stops.non_block.check.count;
 			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
 				stop = stopsIterable[indexStop];
-				marker = L.marker([stop.lat, stop.lon], {icon: iconEdit}).on('click', function (e) {
+				marker = L.marker([stop.lat, stop.lon], {icon: iconCheck}).on('click', function (e) {
 					var marker = e.target;
 					$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
 					context.buildStopPopup(marker.stop_id);

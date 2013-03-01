@@ -111,7 +111,7 @@
 			stopsIterableLength = data.stops.non_block.check.count;
 			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
 				stop = stopsIterable[indexStop];
-				marker = L.marker([stop.lat, stop.lon], {icon: iconEdit}).on('click', function (e) {
+				marker = L.marker([stop.lat, stop.lon], {icon: iconCheck}).on('click', function (e) {
 					var marker = e.target;
 					$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
 					context.buildStopPopup(marker.stop_id);
