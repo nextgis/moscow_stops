@@ -21,9 +21,6 @@
 			$.view.$document.on('/sm/osm/updateOsmLayer', function () {
 				context.updateOsmLayer();
 			});
-			$.viewmodel.map.on('zoomend', function (e) {
-				$.view.$document.trigger('/sm/osm/updateOsmLayer');
-			});
 		},
 
 		setDomOptions: function () {

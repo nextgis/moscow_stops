@@ -2,9 +2,9 @@
 from moscow_stops.models import DBSession
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.request import Request
 from models import Stop
 from sqlalchemy.orm import joinedload
+from sqlalchemy.sql.expression import asc
 import transaction
 from decorators import authorized
 from helpers import sql_generate_for_many_to_many, str_to_boolean
@@ -21,24 +21,46 @@ def get(context, request):
 	           bbox['_northEast']['lng'], bbox['_northEast']['lat'], \
 	           bbox['_northEast']['lng'], bbox['_southWest']['lat'], \
 	           bbox['_southWest']['lng'], bbox['_southWest']['lat'])
-	stops_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).options(joinedload(Stop.stop_types)).filter(Stop.geom.within(box_geom))
+
+	clauses = []
+	if 'filter' in request.GET:
+		filter = json.loads(request.GET['filter'])
+		name = filter['name'].encode('UTF-8')
+		if filter['id'].isdigit() or name.strip():
+			if name.__len__() > 3:
+				name += '%'
+				clauses.append(Stop.name.like(name))
+			if filter['id'].isdigit():
+				id = int(filter['id'])
+				clauses.append(Stop.id == id)
+		else:
+			clauses.append(Stop.geom.within(box_geom))
+
+	stops_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).options(joinedload(Stop.stop_types)).filter(*clauses) \
+		.order_by(asc(Stop.is_block), asc(Stop.name))
 
 	stops_result = {'stops' : {
-		'block' : {},
-		'non_block' : {'check' : {}, 'non_check' : {} }
+		'block' : {'count' : 0, 'elements' : []},
+		'non_block' :
+			{'check' : { 'count' : 0, 'elements' : [] },
+			 'non_check' : { 'count' : 0, 'elements' : [] }
+			}
 	}}
 	for stop in stops_from_db:
-		stop_geom = { 'lon' : stop[1], 'lat' : stop[2] }
+		stop_entity = {'id' : stop[0].id , 'name' : stop[0].name, 'lon' : stop[1], 'lat' : stop[2] }
 		if stop[0].is_block:
-			stops_result['stops']['block'][stop[0].id] = stop_geom
+			stops_result['stops']['block']['elements'].append(stop_entity)
+			stops_result['stops']['block']['count'] += 1
 		else:
 			if stop[0].is_bench is None \
 				and stop[0].is_shelter is None \
 				and len(stop[0].stop_types) == 0 \
 				and stop[0].panorama_link is None:
-				stops_result['stops']['non_block']['non_check'][stop[0].id] = stop_geom
+				stops_result['stops']['non_block']['non_check']['elements'].append(stop_entity)
+				stops_result['stops']['non_block']['non_check']['count'] += 1
 			else:
-				stops_result['stops']['non_block']['check'][stop[0].id] = stop_geom
+				stops_result['stops']['non_block']['check']['elements'].append(stop_entity)
+				stops_result['stops']['non_block']['check']['count'] += 1
 
 	return Response(json.dumps(stops_result))
 

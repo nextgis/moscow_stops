@@ -47,6 +47,7 @@
 <p class="chromeframe">Вы используете <strong>устаревший</strong> браузер. Пожалуйста <a href="http://browsehappy.com/">обновите
 	ваш браузер</a></p>
 <![endif]-->
+<div id="target"></div>
 <div id="map"></div>
 <!--<div id="map-controls">-->
 	<!--<div class="osm-layer-control"><span></span></a>-->
@@ -78,29 +79,18 @@ class="inner"
 	<div class="title"><span>Поиск</span></div>
 	<form class="form-search">
 		<fieldset>
-			<input type="text" class="input-name" placeholder="Название">
-			<input type="text" class="input-id" placeholder="ID">
+			<input id="filter_name" type="text" class="input-name" placeholder="Название">
+			<input id="filter_id" type="text" class="input-id" placeholder="ID">
+			<div id="search" class="inactive" title="Поиск">
+				<span></span>
+			</div>
 		</fieldset>
 	</form>
-	<div id="searchResults">
-		<ul>
-			<li>Хлебозавод</li>
-			<li>56-я городская больница</li>
-			<li>Павелецкая набережная, 2</li>
-			<li>Детский сад</li>
-			<li>1-я Ситценабивная фабрика</li>
-			<li>Дербеневская набережная</li>
-			<li>Дербеневская улица</li>
-			<li>Новоспасский мост</li>
-			<li>Кожевническая улица</li>
-			<li>Шлюзовая набережная - Дом Музыки</li>
-			<li>Детская поликлиника № 18</li>
-			<li>Шлюзовая набережная - Дом Музыки</li>
-			<li>Метро "Павелецкая"</li>
-			<li>Большой Строченовский переулок</li>
-			<li>Большой Строченовский переулок</li>
-			<li>Павелецкий вокзал</li>
-		</ul>
+	<div id="searchResults" class="">
+		<p class="description">Для поиска введите</br>название остановки (более 3 символов)</br>или ее ID (только цифры)</br>и нажмите на кнопку</br></br>
+			Для отображения списка остановок кликните на эту область
+		</p>
+		<div></div>
 	</div>
 </div>
 <div id="editorContainer">

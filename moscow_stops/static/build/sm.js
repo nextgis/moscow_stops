@@ -902,7 +902,7 @@
 
 	$.sm.loader = {};
 	$.extend($.sm.loader, {
-		templates: ['osmPopupTemplate', 'stopPopupTemplate', 'stopPopupInfoTemplate'],
+		templates: ['osmPopupTemplate', 'stopPopupTemplate', 'stopPopupInfoTemplate', 'searchResultsTemplate'],
 
 		init: function () {
 			try {
@@ -1094,33 +1094,16 @@
 				$.view.$document.trigger('/sm/map/updateAllLayers');
 			});
 			$.view.$document.on('/sm/map/updateAllLayers', function () {
-				$.view.$document.trigger('/sm/osm/updateOsmLayer');
 				$.view.$document.trigger('/sm/stops/updateStops');
-//				$.when($.view.$document.trigger('/sm/osm/updateOsmLayer'),
-//						$.view.$document.trigger('/sm/stops/updateStops')).then(function () {
-//						var s = $.viewmodel.mapLayers.select._layers,
-//							smarker = s[Object.keys(s)[0]];
-//						if (smarker && !$.viewmodel.isPopupOpened) {
-//							smarker.openPopup();
-//							$.viewmodel.isPopupOpened = true;
-//							$.view.$document.trigger('/sm/map/openPopupEnd', [smarker]);
-//						}
-//					});
+				$.view.$document.trigger('/sm/osm/updateOsmLayer');
 			});
 			$.view.$document.on('/sm/map/openPopup', function (e, latlng, html) {
 				var vm = $.viewmodel,
 					selectLayer = vm.mapLayers.select,
 					map = vm.map;
-//				map.closePopup();
 				map.panTo(latlng);
 				map.openPopup(L.popup().setLatLng(latlng).setContent(html));
-//				s.clearLayers();
-//				s.addLayer(m);
 
-			});
-			$.view.$document.on('/sm/map/MarkerClick', function (e) {
-//				$.viewmodel.mapLayers.select.clearLayers();
-//				$.viewmodel.map.closePopup();
 			});
 			$.viewmodel.map.on('popupclose', function () {
 				var vm = $.viewmodel;
@@ -1168,13 +1151,20 @@
 	});
 })(jQuery);(function ($) {
 	$.extend($.viewmodel, {
-		searcherCollapsed: false
+		searcherCollapsed: false,
+		filter: {'id' : '', 'name' : ''}
 	});
 	$.extend($.view, {
-		$searchContainer: null
+		$searchContainer: null,
+		$filterName: null,
+		$filterId: null,
+		$searchButton: null,
+		$searchResults: null
 	});
 	$.sm.searcher = {};
 	$.extend($.sm.searcher, {
+		min_characters_name: 3,
+
 		init: function () {
 			this.setDomOptions();
 			this.bindEvents();
@@ -1186,14 +1176,98 @@
 				$.viewmodel.searcherCollapsed = !$.viewmodel.searcherCollapsed;
 				$.view.$body.toggleClass('searcher-collapsed', context.searcherCollapsed);
 			});
+			$.view.$filterName.off('keyup').on('keyup', function () {
+				var isValid = context.validateSearch($.view.$filterId.val(), $(this).val());
+				context.updateUI(isValid);
+				context.updateFilter(isValid);
+			});
+			$.view.$filterId.off('keyup').on('keyup', function () {
+				var isValid = context.validateSearch($(this).val(), $.view.$filterName.val());
+				context.updateUI(isValid);
+				context.updateFilter(isValid);
+			});
+			$('#filter_name, #filter_id').off('focus').on('focus', function () {
+				$.view.$searchResults.removeClass('active');
+			});
+			$('#searchResults p.description').off('click').on('click', function () {
+				$.view.$searchResults.addClass('active');
+			});
+			$.view.$searchButton.off('click').on('click', function () {
+				if ($(this).hasClass('active')) {
+					context.search();
+				}
+			});
+			$.view.$document.on('/sm/searcher/update', function () {
+				context.updateSearch();
+			});
 		},
 
 		setDomOptions: function () {
 			$.view.$searchContainer = $('#searchContainer');
+			$.view.$filterName = $('#filter_name');
+			$.view.$filterId = $('#filter_id');
+			$.view.$searchButton = $('#search');
+			$.view.$searchResults = $('#searchResults');
+
 		},
 
-		search: function (name, id) {
+		validateSearch: function (id, name) {
+			var intRegex = /^\d+$/,
+				min_characters_name = this.min_characters_name,
+				$v = $.view,
+				id = id || $v.$filterId.val(),
+				name = name || $v.$filterName.val();
+			if ((name.length > min_characters_name && id == '') ||
+				((name == '' || name.length <= min_characters_name)  && intRegex.test(id)) ||
+				(name.length > min_characters_name && intRegex.test(id))) {
+				return true;
+			} else {
+				return false;
+			}
+		},
 
+		updateUI: function (isValid) {
+			$.view.$searchButton.toggleClass('active', isValid);
+		},
+
+		search: function () {
+			this.updateFilter(this.validateSearch());
+			$.view.$document.trigger('/sm/stops/updateStops');
+			$.view.$searchResults.addClass('active');
+		},
+
+		updateFilter: function (isValid) {
+			var $v = $.view,
+				vm = $.viewmodel;
+			if (isValid) {
+				vm.filter.name = $v.$filterName.val(),
+				vm.filter.id = $v.$filterId.val();
+			} else {
+				vm.filter = {'id' : '', 'name' : ''};
+			}
+
+		},
+
+		updateSearch: function () {
+			var stops = $.viewmodel.stops,
+				$divSearchResults = $.view.$searchResults.find('div'),
+				html;
+			html = this.getHtmlForSearchResults('non_check', stops.non_block.non_check.elements)
+			html += this.getHtmlForSearchResults('check', stops.non_block.check.elements)
+			html += this.getHtmlForSearchResults('block', stops.block.elements)
+			$divSearchResults.empty().append(html);
+			$divSearchResults.find('a').on('click', function () {
+				var $li = $(this).parent();
+				$.viewmodel.map.setView(new L.LatLng($li.data('lat'), $li.data('lon')), 18);
+				$('#target').show().delay(1000).fadeOut(1000);
+			})
+		},
+
+		getHtmlForSearchResults: function (cssClass, stops) {
+			return $.templates.searchResultsTemplate({
+				cssClass: cssClass,
+				stops: stops
+			});
 		}
 	});
 })(jQuery);
@@ -1479,8 +1553,6 @@
 			v.$editorContainer.find('form').addClass('disabled');
 			$('#routes').importTags('');
 			$.view.$document.trigger('/sm/map/updateAllLayers');
-//			vd.trigger('/sm/osm/updateOsmLayer');
-//			vd.trigger('/sm/stops/updateStops');
 		}
 	});
 })(jQuery);
@@ -1507,9 +1579,6 @@
 			var context = this;
 			$.view.$document.on('/sm/osm/updateOsmLayer', function () {
 				context.updateOsmLayer();
-			});
-			$.viewmodel.map.on('zoomend', function (e) {
-				$.view.$document.trigger('/sm/osm/updateOsmLayer');
 			});
 		},
 
@@ -1603,7 +1672,8 @@
 (function ($) {
 	$.extend($.viewmodel, {
 		stopSelected: null,
-		stopSelectedId: null
+		stopSelectedId: null,
+		stops: null
 	});
 	$.extend($.view, {
 
@@ -1619,11 +1689,8 @@
 
 		bindEvents: function () {
 			var context = this;
-			$.view.$document.on('/sm/stops/updateStops', function (e, isCleared) {
-				context.updateStops(isCleared);
-			});
-			$.view.$document.off('/sm/map/openPopupEnd').on('/sm/map/openPopupEnd', function (marker) {
-
+			$.view.$document.on('/sm/stops/updateStops', function () {
+				context.updateStops();
 			});
 		},
 
@@ -1650,12 +1717,20 @@
 
 		updateStopsByAjax: function () {
 			var context = this,
-				url = document['url_root'] + 'stops?bbox=' + JSON.stringify($.viewmodel.get_bbox());
+				url = document['url_root'] + 'stops',
+				filter = $.viewmodel.filter;
 			$.ajax({
 				type: "GET",
 				url: url,
+				data: {
+					'bbox' : JSON.stringify($.viewmodel.get_bbox()),
+					'filter' : JSON.stringify(filter)
+				},
 				dataType: 'json',
-				success: context.renderStops,
+				success: function(data) {
+					context.renderStops(data);
+					$.view.$document.trigger('/sm/searcher/update');
+				},
 				context: context
 			});
 		},
@@ -1667,49 +1742,53 @@
 				iconBlock = mp.getIcon('stop-block', 20),
 				iconEdit = mp.getIcon('stop-edit', 20),
 				iconCheck = mp.getIcon('stop-check', 20),
-				stopsIterable, stop, marker, popupHtml,
+				stopsIterable, stopsIterableLength, indexStop,
+				stop, marker, popupHtml,
 				htmlPopup = $.templates.stopPopupTemplate({ css: 'edit' }),
 				context = this;
 
-			stopsIterable = data.stops.block;
-			for (stop in stopsIterable) {
-				if (stopsIterable.hasOwnProperty(stop)) {
-					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconBlock})
-						.on('click', function (e) {
-							var marker = e.target;
-							$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
-							context.buildStopPopup(marker.stop_id);
-						});
-					marker['stop_id'] = stop;
-					stopsLayer.addLayer(marker);
-				}
-			}
+			vm.stops = data.stops;
 
-			stopsIterable = data.stops.non_block.non_check;
-			for (stop in stopsIterable) {
-				if (stopsIterable.hasOwnProperty(stop)) {
-					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconEdit})
-						.on('click', function (e) {
-							var marker = e.target;
-							$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
-							context.buildStopPopup(marker.stop_id);
-					});
-					marker['stop_id'] = stop;
-					stopsLayer.addLayer(marker);
-				}
-			}
-
-			stopsIterable = data.stops.non_block.check;
-			for (stop in stopsIterable) {
-				if (stopsIterable.hasOwnProperty(stop)) {
-					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconEdit}).on('click', function (e) {
+			stopsIterable = data.stops.block.elements;
+			stopsIterableLength = data.stops.block.count;
+			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
+				stop = stopsIterable[indexStop];
+				marker = L.marker([stop.lat, stop.lon], {icon: iconBlock})
+					.on('click', function (e) {
 						var marker = e.target;
 						$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
 						context.buildStopPopup(marker.stop_id);
 					});
-					marker['stop_id'] = stop;
-					stopsLayer.addLayer(marker);
-				}
+				marker['stop_id'] = stop.id;
+				stopsLayer.addLayer(marker);
+			}
+
+			stopsIterable = data.stops.non_block.non_check.elements;
+			stopsIterableLength = data.stops.non_block.non_check.count;
+			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
+				stop = stopsIterable[indexStop];
+				marker = L.marker([stop.lat, stop.lon], {icon: iconEdit})
+					.on('click', function (e) {
+						var marker = e.target;
+						$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
+						context.buildStopPopup(marker.stop_id);
+					});
+				marker['stop_id'] = stop.id;
+				stopsLayer.addLayer(marker);
+			}
+
+
+			stopsIterable = data.stops.non_block.check.elements;
+			stopsIterableLength = data.stops.non_block.check.count;
+			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
+				stop = stopsIterable[indexStop];
+				marker = L.marker([stop.lat, stop.lon], {icon: iconEdit}).on('click', function (e) {
+					var marker = e.target;
+					$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
+					context.buildStopPopup(marker.stop_id);
+				});
+				marker['stop_id'] = stop.id;
+				stopsLayer.addLayer(marker);
 			}
 		},
 

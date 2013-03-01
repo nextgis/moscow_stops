@@ -21,14 +21,13 @@
 				$.view.$document.trigger('/sm/map/updateAllLayers');
 			});
 			$.view.$document.on('/sm/map/updateAllLayers', function () {
-				$.view.$document.trigger('/sm/osm/updateOsmLayer');
 				$.view.$document.trigger('/sm/stops/updateStops');
+				$.view.$document.trigger('/sm/osm/updateOsmLayer');
 			});
 			$.view.$document.on('/sm/map/openPopup', function (e, latlng, html) {
 				var vm = $.viewmodel,
 					selectLayer = vm.mapLayers.select,
 					map = vm.map;
-//				map.closePopup();
 				map.panTo(latlng);
 				map.openPopup(L.popup().setLatLng(latlng).setContent(html));
 

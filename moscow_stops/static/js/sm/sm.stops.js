@@ -1,7 +1,8 @@
 (function ($) {
 	$.extend($.viewmodel, {
 		stopSelected: null,
-		stopSelectedId: null
+		stopSelectedId: null,
+		stops: null
 	});
 	$.extend($.view, {
 
@@ -17,11 +18,8 @@
 
 		bindEvents: function () {
 			var context = this;
-			$.view.$document.on('/sm/stops/updateStops', function (e, isCleared) {
-				context.updateStops(isCleared);
-			});
-			$.view.$document.off('/sm/map/openPopupEnd').on('/sm/map/openPopupEnd', function (marker) {
-
+			$.view.$document.on('/sm/stops/updateStops', function () {
+				context.updateStops();
 			});
 		},
 
@@ -48,12 +46,20 @@
 
 		updateStopsByAjax: function () {
 			var context = this,
-				url = document['url_root'] + 'stops?bbox=' + JSON.stringify($.viewmodel.get_bbox());
+				url = document['url_root'] + 'stops',
+				filter = $.viewmodel.filter;
 			$.ajax({
 				type: "GET",
 				url: url,
+				data: {
+					'bbox' : JSON.stringify($.viewmodel.get_bbox()),
+					'filter' : JSON.stringify(filter)
+				},
 				dataType: 'json',
-				success: context.renderStops,
+				success: function(data) {
+					context.renderStops(data);
+					$.view.$document.trigger('/sm/searcher/update');
+				},
 				context: context
 			});
 		},
@@ -65,49 +71,53 @@
 				iconBlock = mp.getIcon('stop-block', 20),
 				iconEdit = mp.getIcon('stop-edit', 20),
 				iconCheck = mp.getIcon('stop-check', 20),
-				stopsIterable, stop, marker, popupHtml,
+				stopsIterable, stopsIterableLength, indexStop,
+				stop, marker, popupHtml,
 				htmlPopup = $.templates.stopPopupTemplate({ css: 'edit' }),
 				context = this;
 
-			stopsIterable = data.stops.block;
-			for (stop in stopsIterable) {
-				if (stopsIterable.hasOwnProperty(stop)) {
-					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconBlock})
-						.on('click', function (e) {
-							var marker = e.target;
-							$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
-							context.buildStopPopup(marker.stop_id);
-						});
-					marker['stop_id'] = stop;
-					stopsLayer.addLayer(marker);
-				}
-			}
+			vm.stops = data.stops;
 
-			stopsIterable = data.stops.non_block.non_check;
-			for (stop in stopsIterable) {
-				if (stopsIterable.hasOwnProperty(stop)) {
-					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconEdit})
-						.on('click', function (e) {
-							var marker = e.target;
-							$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
-							context.buildStopPopup(marker.stop_id);
-					});
-					marker['stop_id'] = stop;
-					stopsLayer.addLayer(marker);
-				}
-			}
-
-			stopsIterable = data.stops.non_block.check;
-			for (stop in stopsIterable) {
-				if (stopsIterable.hasOwnProperty(stop)) {
-					marker = L.marker([stopsIterable[stop].lat, stopsIterable[stop].lon], {icon: iconEdit}).on('click', function (e) {
+			stopsIterable = data.stops.block.elements;
+			stopsIterableLength = data.stops.block.count;
+			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
+				stop = stopsIterable[indexStop];
+				marker = L.marker([stop.lat, stop.lon], {icon: iconBlock})
+					.on('click', function (e) {
 						var marker = e.target;
 						$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
 						context.buildStopPopup(marker.stop_id);
 					});
-					marker['stop_id'] = stop;
-					stopsLayer.addLayer(marker);
-				}
+				marker['stop_id'] = stop.id;
+				stopsLayer.addLayer(marker);
+			}
+
+			stopsIterable = data.stops.non_block.non_check.elements;
+			stopsIterableLength = data.stops.non_block.non_check.count;
+			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
+				stop = stopsIterable[indexStop];
+				marker = L.marker([stop.lat, stop.lon], {icon: iconEdit})
+					.on('click', function (e) {
+						var marker = e.target;
+						$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
+						context.buildStopPopup(marker.stop_id);
+					});
+				marker['stop_id'] = stop.id;
+				stopsLayer.addLayer(marker);
+			}
+
+
+			stopsIterable = data.stops.non_block.check.elements;
+			stopsIterableLength = data.stops.non_block.check.count;
+			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
+				stop = stopsIterable[indexStop];
+				marker = L.marker([stop.lat, stop.lon], {icon: iconEdit}).on('click', function (e) {
+					var marker = e.target;
+					$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
+					context.buildStopPopup(marker.stop_id);
+				});
+				marker['stop_id'] = stop.id;
+				stopsLayer.addLayer(marker);
 			}
 		},
 
