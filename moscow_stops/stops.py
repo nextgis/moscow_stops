@@ -28,8 +28,8 @@ def get(context, request):
 		name = filter['name'].encode('UTF-8')
 		if filter['id'].isdigit() or name.strip():
 			if name.__len__() > 3:
-				name += '%'
-				clauses.append(Stop.name.like(name))
+				name = '%' + name + '%'
+				clauses.append(Stop.name.ilike(name))
 			if filter['id'].isdigit():
 				id = int(filter['id'])
 				clauses.append(Stop.id == id)

@@ -1233,7 +1233,6 @@
 		search: function () {
 			this.updateFilter(this.validateSearch());
 			$.view.$document.trigger('/sm/stops/updateStops');
-			$.view.$searchResults.addClass('active');
 		},
 
 		updateFilter: function (isValid) {
@@ -1260,7 +1259,8 @@
 				var $li = $(this).parent();
 				$.viewmodel.map.setView(new L.LatLng($li.data('lat'), $li.data('lon')), 18);
 				$('#target').show().delay(1000).fadeOut(1000);
-			})
+			});
+			$.view.$searchResults.addClass('active');
 		},
 
 		getHtmlForSearchResults: function (cssClass, stops) {
