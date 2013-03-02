@@ -170,7 +170,8 @@ def get_logs(context, request):
 		.group_by(LogStops.user_id) \
 		.subquery()
 	user_stops_log = session.query(User, user_stops_count_sbq.c.count_stops)\
-		.outerjoin(user_stops_count_sbq, User.id == user_stops_count_sbq.c.user_id)
+		.outerjoin(user_stops_count_sbq, User.id == user_stops_count_sbq.c.user_id)\
+		.order_by(asc(User.display_name))
 	results = []
 	for user_stops_log in user_stops_log:
 		results.append({'user_name' : user_stops_log[0].display_name, 'count_stops' : user_stops_log[1]})
