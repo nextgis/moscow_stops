@@ -4,6 +4,20 @@ body {
 	overflow:hidden;
 }
 
+body.popup div.popup-background {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	display: block;
+	z-index: 1100;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(255, 255, 255, 0.7);
+}
+
+
 html, body, #map {
 	width: 100%;
 	height: 100%;
@@ -11,6 +25,67 @@ html, body, #map {
 
 .loader {
 	background: url('../img/loader.gif') center no-repeat;
+}
+
+body.loader div.main-loader {
+	position: absolute;
+	display: block;
+	width: 100%;
+	height: 100%;
+	background: url('../img/loader.gif') center no-repeat transparent;
+	z-index: 3000;
+}
+
+body #popup {
+	display: none;
+}
+
+body.popup #popup {
+	display: block;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	border: 1px solid #c3c3c3;
+	border-radius: 4px 4px 4px 4px;
+	background-color: #ffffff;
+	z-index: 1101;
+}
+
+#popup div.header {
+	background-color: #F5F0F7;
+	color: #756a73;
+	font-size: 15px;
+	height: 24px;
+	line-height: 26px;
+	text-indent: 20px;
+}
+
+#popup a.close {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	width: 22px;
+	height: 22px;
+	background: url('../img/sm-icons.png') -35px -123px;
+	opacity: 0.5;
+}
+
+#popup a.close:hover {
+	opacity: 1;
+}
+
+#popup div.content table.logs {
+	width: auto;
+	margin: 15px;
+
+}
+
+#popup div.content table.logs td {
+	line-height: 8px;
+}
+
+#popup div.content table.logs td.stop {
+	text-align: right;
 }
 
 #target {
@@ -23,7 +98,7 @@ html, body, #map {
 	margin-left: -15px;
 	margin-top: -15px;
 	top: 50%;
-	z-index: 9999;
+	z-index: 901;
 }
 
 #userContainer {
@@ -35,7 +110,7 @@ html, body, #map {
 	text-align: center;
 	background-color: #ffffff;
 	border: 1px solid #AFAFAF;
-	z-index: 9999;
+	z-index: 900;
 }
 
 #userContainer form {
@@ -66,6 +141,29 @@ html, body, #map {
 	float: right;
 }
 
+#signOutForm div.log {
+	width: 39px;
+	height: 39px;
+	position: absolute;
+	top: 0px;
+	left: -46px;
+	background-color: #ffffff;
+	border: 1px solid #afafaf;
+	cursor: pointer;
+}
+
+#signOutForm div.log span {
+	display: inline-block;
+	margin: 4px 0 0 5px;
+	width: 29px;
+	height: 31px;
+	background: url('../img/sm-icons.png') -30px -190px;
+}
+
+#signOutForm div.log:hover span {
+	background: url('../img/sm-icons.png') -58px -190px;
+}
+
 #searchContainer .title,
 #editorContainer .title {
 	height: 32px;
@@ -89,7 +187,7 @@ html, body, #map {
 	width: 300px;
 	background-color: #ffffff;
 	border: 1px solid #AFAFAF;
-	z-index: 9999;
+	z-index: 900;
 }
 
 #searchContainer span.icon-collapse {

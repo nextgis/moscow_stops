@@ -13,7 +13,7 @@
 
 	$.sm.loader = {};
 	$.extend($.sm.loader, {
-		templates: ['osmPopupTemplate', 'stopPopupTemplate', 'stopPopupInfoTemplate', 'searchResultsTemplate'],
+		templates: ['osmPopupTemplate', 'stopPopupTemplate', 'stopPopupInfoTemplate', 'searchResultsTemplate', 'userLogsTemplate'],
 
 		init: function () {
 			try {

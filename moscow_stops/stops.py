@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
-from moscow_stops.models import DBSession
+from datetime import datetime
+
 from pyramid.view import view_config
 from pyramid.response import Response
-from models import Stop
+
+from models import DBSession, Stop, LogStops, User
+
+from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.expression import asc
+
 import transaction
 from decorators import authorized
 from helpers import sql_generate_for_many_to_many, str_to_boolean
+
 import json
 
 @view_config(route_name='stops', request_method='GET')
@@ -118,6 +124,7 @@ def stop_unblock(context, request):
 	return Response()
 
 @view_config(route_name='stop', request_method='POST')
+@authorized()
 def update_stop(context, request):
 	stop = json.loads(request.POST['stop'])
 	session = DBSession()
@@ -145,6 +152,26 @@ def update_stop(context, request):
 	if sql_types:
 		session.execute(sql_types)
 
+	log = LogStops()
+	log.stop_id = stop['id']
+	log.user_id = request.session['u_id']
+	log.time = datetime.now()
+	session.add(log)
+
 	transaction.commit()
-	# return Response(json.dumps(stop))
-	return Response(sql_routes)
+	return Response(json.dumps(stop))
+
+@view_config(route_name='logs', request_method='GET')
+@authorized()
+def get_logs(context, request):
+	session = DBSession()
+	user_stops_count_sbq = session\
+		.query(LogStops.user_id.label('user_id'), func.count(LogStops.stop_id.distinct()).label('count_stops'))\
+		.group_by(LogStops.user_id) \
+		.subquery()
+	user_stops_log = session.query(User, user_stops_count_sbq.c.count_stops)\
+		.outerjoin(user_stops_count_sbq, User.id == user_stops_count_sbq.c.user_id)
+	results = []
+	for user_stops_log in user_stops_log:
+		results.append({'user_name' : user_stops_log[0].display_name, 'count_stops' : user_stops_log[1]})
+	return Response (json.dumps(results))

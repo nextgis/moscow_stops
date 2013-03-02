@@ -43,6 +43,13 @@
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.user.js')}"></script>
 </head>
 <body class="searcher-collapsed">
+<div class="popup-background"></div>
+<div id="popup">
+	<a class="close"></a>
+	<div class="header">sadfasdfasdf</div>
+	<div class="content"></div>
+</div>
+<div class="main-loader"></div>
 <!--[if lt IE 7]>
 <p class="chromeframe">Вы используете <strong>устаревший</strong> браузер. Пожалуйста <a href="http://browsehappy.com/">обновите
 	ваш браузер</a></p>
@@ -63,6 +70,7 @@ class="inner"
 		<button type="submit" class="btn btn-primary">Войти</button>
 	</form>
 	<form id="signOutForm" class="form-inline" method="post">
+		<div class="log"><span></span></div>
 		<fieldset>
 			<label id="display-name" class="control-label">
 				% if u_name:

@@ -902,7 +902,7 @@
 
 	$.sm.loader = {};
 	$.extend($.sm.loader, {
-		templates: ['osmPopupTemplate', 'stopPopupTemplate', 'stopPopupInfoTemplate', 'searchResultsTemplate'],
+		templates: ['osmPopupTemplate', 'stopPopupTemplate', 'stopPopupInfoTemplate', 'searchResultsTemplate', 'userLogsTemplate'],
 
 		init: function () {
 			try {
@@ -1045,7 +1045,8 @@
 	});
 
 	$.extend($.view, {
-		$body: null
+		$body: null,
+		$popup: null
 	});
 
 	$.sm.common = {};
@@ -1056,18 +1057,39 @@
 		},
 
 		bindEvents: function () {
-			// TODO add disappearance panels while windows will resize
+			var context = this;
+			$.view.$document.on('/sm/common/openPopup', function (e, header, contentPopup) {
+				context.openPopup(header, contentPopup);
+			});
+			$.view.$popup.find('a.close').off('click').on('click', function () {
+				$.view.$body.removeClass('popup');
+			});
+			$.view.$document.on('/sm/common/setMainLoad', function () {
+				$.view.$body.addClass('loader');
+			});
 		},
 
-		showErrorPopup: function () {
+		openPopup: function (header, content) {
+			var $popup = $.view.$popup,
+				marginLeft, marginTop;
+			$popup.find('div.header').text(header);
+			$popup.find('div.content').html(content);
+			marginLeft = $popup.width() / 2;
+			marginTop = $popup.height() / 2;
+			$popup.css({
+				'margin-left' : -marginLeft + 'px',
+				'margin-top' :  -marginTop  + 'px'
+			});
+			$.view.$body.addClass('popup');
 		},
 
-		setPopups: function () {
+		closePopup: function () {
 
 		},
 
 		setDomOptions: function () {
 			$.view.$body = $('body');
+			$.view.$popup = $('#popup');
 		}
 	});
 })(jQuery);
@@ -1946,6 +1968,7 @@
 	$.extend($.sm.user, {
 		init: function () {
 			this.setDomOptions();
+			this.bindEvents();
 		},
 
 		setDomOptions: function () {
@@ -1953,6 +1976,28 @@
 			$.view.$signInForm = $('#signInForm');
 			$.view.$signOutForm = $('#signOutForm');
 			if ($.view.$userContainer.hasClass('inner')) { $.viewmodel.isAuth = true; }
+		},
+
+		bindEvents: function () {
+			var context = this;
+			$('#signOutForm div.log').off('click').on('click', function () {
+				context.renderLogs();
+			});
+		},
+
+		renderLogs: function () {
+			var url = document['url_root'] + 'logs';
+			$.view.$document.trigger('/sm/common/setMainLoad');
+			$.ajax({
+				type: "GET",
+				url: url,
+				dataType: 'json',
+				success: function(data) {
+					var html = $.templates.userLogsTemplate({ user_logs: data });
+					$.view.$body.removeClass('loader');
+					$.view.$document.trigger('/sm/common/openPopup', ['Статистика пользователей', html]);
+				}
+			});
 		}
 	});
 })(jQuery);

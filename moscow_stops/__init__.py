@@ -26,5 +26,6 @@ def main(global_config, **settings):
 	config.add_route('stop', '/stop/{id}')
 	config.add_route('stop_block', '/stop/block/{id}')
 	config.add_route('stop_unblock', '/stop/unblock/{id}')
+	config.add_route('logs', '/logs')
 	config.scan()
 	return config.make_wsgi_app()

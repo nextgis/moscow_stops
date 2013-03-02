@@ -1,0 +1,12 @@
+<table class="table table-striped logs">
+	<tr>
+		<th>Пользователь</th>
+		<th>Кол-во остановок</th>
+	</tr>
+	{{#user_logs}}
+	<tr>
+		<td>{{user_name}}</td>
+		<td class="stop">{{count_stops}}</td>
+	</tr>
+	{{/user_logs}}
+</table>
