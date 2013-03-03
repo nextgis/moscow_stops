@@ -353,6 +353,130 @@
 
 })(jQuery);
 /*!
+ * jQuery imagesLoaded plugin v2.1.1
+ * http://github.com/desandro/imagesloaded
+ *
+ * MIT License. by Paul Irish et al.
+ */
+
+/*jshint curly: true, eqeqeq: true, noempty: true, strict: true, undef: true, browser: true */
+/*global jQuery: false */
+
+;(function($, undefined) {
+'use strict';
+
+// blank image data-uri bypasses webkit log warning (thx doug jones)
+var BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+
+$.fn.imagesLoaded = function( callback ) {
+	var $this = this,
+		deferred = $.isFunction($.Deferred) ? $.Deferred() : 0,
+		hasNotify = $.isFunction(deferred.notify),
+		$images = $this.find('img').add( $this.filter('img') ),
+		loaded = [],
+		proper = [],
+		broken = [];
+
+	// Register deferred callbacks
+	if ($.isPlainObject(callback)) {
+		$.each(callback, function (key, value) {
+			if (key === 'callback') {
+				callback = value;
+			} else if (deferred) {
+				deferred[key](value);
+			}
+		});
+	}
+
+	function doneLoading() {
+		var $proper = $(proper),
+			$broken = $(broken);
+
+		if ( deferred ) {
+			if ( broken.length ) {
+				deferred.reject( $images, $proper, $broken );
+			} else {
+				deferred.resolve( $images );
+			}
+		}
+
+		if ( $.isFunction( callback ) ) {
+			callback.call( $this, $images, $proper, $broken );
+		}
+	}
+
+	function imgLoadedHandler( event ) {
+		imgLoaded( event.target, event.type === 'error' );
+	}
+
+	function imgLoaded( img, isBroken ) {
+		// don't proceed if BLANK image, or image is already loaded
+		if ( img.src === BLANK || $.inArray( img, loaded ) !== -1 ) {
+			return;
+		}
+
+		// store element in loaded images array
+		loaded.push( img );
+
+		// keep track of broken and properly loaded images
+		if ( isBroken ) {
+			broken.push( img );
+		} else {
+			proper.push( img );
+		}
+
+		// cache image and its state for future calls
+		$.data( img, 'imagesLoaded', { isBroken: isBroken, src: img.src } );
+
+		// trigger deferred progress method if present
+		if ( hasNotify ) {
+			deferred.notifyWith( $(img), [ isBroken, $images, $(proper), $(broken) ] );
+		}
+
+		// call doneLoading and clean listeners if all images are loaded
+		if ( $images.length === loaded.length ) {
+			setTimeout( doneLoading );
+			$images.unbind( '.imagesLoaded', imgLoadedHandler );
+		}
+	}
+
+	// if no images, trigger immediately
+	if ( !$images.length ) {
+		doneLoading();
+	} else {
+		$images.bind( 'load.imagesLoaded error.imagesLoaded', imgLoadedHandler )
+		.each( function( i, el ) {
+			var src = el.src;
+
+			// find out if this image has been already checked for status
+			// if it was, and src has not changed, call imgLoaded on it
+			var cached = $.data( el, 'imagesLoaded' );
+			if ( cached && cached.src === src ) {
+				imgLoaded( el, cached.isBroken );
+				return;
+			}
+
+			// if complete is true and browser supports natural sizes, try
+			// to check for image status manually
+			if ( el.complete && el.naturalWidth !== undefined ) {
+				imgLoaded( el, el.naturalWidth === 0 || el.naturalHeight === 0 );
+				return;
+			}
+
+			// cached images don't fire load sometimes, so we reset src, but only when
+			// dealing with IE, or image is complete (loaded) and failed manual check
+			// webkit hack from http://groups.google.com/group/jquery-dev/browse_thread/thread/eee6ab7b2da50e1f
+			if ( el.readyState || el.complete ) {
+				el.src = BLANK;
+				el.src = src;
+			}
+		});
+	}
+
+	return deferred ? deferred.promise( $this ) : $this;
+};
+
+})(jQuery);/*!
  * mustache.js - Logic-less {{mustache}} templates with JavaScript
  * http://github.com/janl/mustache.js
  */
@@ -905,9 +1029,12 @@
 		templates: ['osmPopupTemplate', 'stopPopupTemplate', 'stopPopupInfoTemplate', 'searchResultsTemplate', 'userLogsTemplate'],
 
 		init: function () {
+			this.setDomOptions();
+			this.compileTemplates();
+		},
+
+		initModules: function () {
 			try {
-				this.setDomOptions();
-				this.compileTemplates();
 				$.sm.common.init();
 				$.sm.map.init();
 				$.sm.searcher.init();
@@ -918,16 +1045,6 @@
 			} catch (e) {
 				alert(e);
 			}
-		},
-
-		bindEvents: function () {
-		},
-
-		showErrorPopup: function () {
-		},
-
-		setPopups: function () {
-
 		},
 
 		setDomOptions: function () {
@@ -949,6 +1066,12 @@
 					var name = htmlTemplates[templateIndex].name;
 					$.templates[name] = Mustache.compile(htmlTemplates[templateIndex].html);
 				}
+				window.setTimeout(function() {
+					context.initModules();
+					$('img').imagesLoaded( function () {
+						$.view.$body.removeClass('loading');
+					});
+				}, 1000);
 			});
 		}
 	});
@@ -1174,13 +1297,14 @@
 })(jQuery);(function ($) {
 	$.extend($.viewmodel, {
 		searcherCollapsed: false,
-		filter: {'id' : '', 'name' : ''},
-		isFilterValidated: false
+		filter: {'id' : '', 'name' : '', 'is_help' : ''},
+		isFilterValidated: true
 	});
 	$.extend($.view, {
 		$searchContainer: null,
 		$filterName: null,
 		$filterId: null,
+		$filterIsHelp: null,
 		$searchButton: null,
 		$searchResults: null
 	});
@@ -1194,38 +1318,42 @@
 		},
 
 		bindEvents: function () {
-			var context = this;
-			$.view.$searchContainer.find('span.icon-collapse, div.title').off('click').on('click', function () {
+			var context = this,
+				v = $.view;
+			v.$searchContainer.find('span.icon-collapse, div.title').off('click').on('click', function () {
 				$.viewmodel.searcherCollapsed = !$.viewmodel.searcherCollapsed;
 				$.view.$body.toggleClass('searcher-collapsed', context.searcherCollapsed);
 			});
-			$.view.$filterName.off('keyup').on('keyup', function (e) {
+			v.$filterName.off('keyup').on('keyup', function (e) {
 				context.keyUpHandler(e);
 			});
-			$.view.$filterId.off('keyup').on('keyup', function (e) {
+			v.$filterId.off('keyup').on('keyup', function (e) {
 				context.keyUpHandler(e);
 			});
 			$('#filter_name, #filter_id').off('focus').on('focus', function () {
 				$.view.$searchResults.prop('class', 'description');
 			});
+//			v.$filterIsHelp.off('change').on('change', function() {
+//				context.updateFilter();
+//			});
 			$('#searchResults p.description').off('click').on('click', function () {
 				$.view.$searchResults.prop('class', 'active');
 			});
-			$.view.$searchButton.off('click').on('click', function () {
+			v.$searchButton.off('click').on('click', function () {
 				if ($.viewmodel.isFilterValidated) {
 					context.applyFilter();
 				}
 			});
-			$.view.$document.on('/sm/searcher/update', function () {
+			v.$document.on('/sm/searcher/update', function () {
 				context.updateSearch();
 			});
-			$.view.$document.on('/sm/stops/startUpdate', function () {
+			v.$document.on('/sm/stops/startUpdate', function () {
 				var v = $.view;
 				v.$searchResults.prop('class', 'update');
 				v.$filterName.prop('disabled', true);
 				v.$filterId.prop('disabled', true);
 			});
-			$.view.$document.on('/sm/stops/endUpdate', function () {
+			v.$document.on('/sm/stops/endUpdate', function () {
 				var v = $.view;
 				v.$searchResults.prop('class', 'active');
 				v.$filterName.prop('disabled', false);
@@ -1234,12 +1362,20 @@
 		},
 
 		setDomOptions: function () {
-			$.view.$searchContainer = $('#searchContainer');
-			$.view.$filterName = $('#filter_name');
-			$.view.$filterId = $('#filter_id');
-			$.view.$searchButton = $('#search');
-			$.view.$searchResults = $('#searchResults');
+			var v = $.view;
+			v.$searchContainer = $('#searchContainer');
+			v.$filterName = $('#filter_name');
+			v.$filterId = $('#filter_id');
+			v.$filterIsHelp = $('#filter_is_help');
+			v.$searchButton = $('#search');
+			v.$searchResults = $('#searchResults');
+		},
 
+		keyUpHandler: function (e) {
+			this.validateSearch();
+			if(e.keyCode == 13) {
+				this.applyFilter();
+			}
 		},
 
 		validateSearch: function () {
@@ -1270,14 +1406,8 @@
 			} else {
 				vm.isFilterValidated = false;
 			}
-		},
 
-		updateUI: function () {
 			$.view.$searchButton.toggleClass('active', $.viewmodel.isFilterValidated);
-		},
-
-		search: function () {
-			$.view.$document.trigger('/sm/stops/updateStops');
 		},
 
 		applyFilter: function () {
@@ -1287,19 +1417,16 @@
 			}
 		},
 
-		keyUpHandler: function (e) {
-			this.validateSearch();
-			this.updateUI();
-			if(e.keyCode == 13) {
-				this.applyFilter();
-			}
-		},
-
 		updateFilter: function () {
 			var $v = $.view,
 				vm = $.viewmodel;
-				vm.filter.name = $v.$filterName.val();
-				vm.filter.id = $v.$filterId.val();
+			vm.filter.name = $v.$filterName.val();
+			vm.filter.id = $v.$filterId.val();
+			vm.filter.is_help = $v.$filterIsHelp.is(':checked');
+		},
+
+		search: function () {
+			$.view.$document.trigger('/sm/stops/updateStops');
 		},
 
 		updateSearch: function () {
@@ -1575,6 +1702,7 @@
 			$('#is_shelter').val(helpers.boolToString(stop.is_shelter, true));
 			$('#is_bench').val(helpers.boolToString(stop.is_bench, true));
 			$('#pan_link').val(helpers.valueNullToString(stop.panorama_link));
+			$('#auto_link').prop('href', this.getPanoramaAutoLink(stop.geom));
 			$('#comment').val(helpers.valueNullToString(stop.comment));
 			$('#is_check').val(stop.is_check);
 
@@ -1585,7 +1713,14 @@
 				$('#is_help').val(0);
 				$('#chb_is_help').prop('checked', false);
 			}
+		},
 
+		getPanoramaAutoLink: function (stopGeom) {
+			var coordinateCenter = stopGeom.lon + ',' + stopGeom.lat;
+			// API from http://clubs.ya.ru/mapsapi/replies.xml?item_no=6331
+			return 'http://maps.yandex.ru/?ll=' + coordinateCenter +
+				'&spn=0.011795,0.004087&l=map,stv&ol=stv&oll=' + coordinateCenter +
+				'&ost=dir:0,0~spn:90,73.739795';
 		},
 
 		fillRoutes: function (routes) {
@@ -1675,6 +1810,7 @@
 			v.$editorContainer.find('input:checkbox').prop('checked', false);
 			v.$editorContainer.find('input, select, textarea, button').attr('disabled', 'disabled');
 			v.$editorContainer.find('form').addClass('disabled');
+			$('#auto_link').prop('href', '');
 			$('#routes').importTags('');
 			$.view.$document.trigger('/sm/map/updateAllLayers');
 		}

@@ -68,10 +68,41 @@ div.tagsinput div {
 	background: #FBD8DB !important;
 	color: #90111A !important;
 }
+html, body, #map {
+	width: 100%;
+	height: 100%;
+}
+
 body {
 	padding: 0;
 	margin: 0;
 	overflow:hidden;
+}
+
+body div.loading {
+	display: none;
+}
+
+body.loading div.loading {
+	display: block;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: #e9e9e9;
+	z-index: 2000;
+	text-align: center;
+}
+
+body.loading div.loading img {
+	margin-top: 70px;
+}
+
+body.loading div.loading span {
+	width: 200px;
+	height: 300px;
+	display: block;
+	margin: 0 auto;
+	font-size: 15px;
 }
 
 body.popup div.popup-background {
@@ -85,12 +116,6 @@ body.popup div.popup-background {
 	width: 100%;
 	height: 100%;
 	background-color: rgba(255, 255, 255, 0.7);
-}
-
-
-html, body, #map {
-	width: 100%;
-	height: 100%;
 }
 
 .loader {
@@ -333,6 +358,15 @@ body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
 	border: 1px solid red;
 }
 
+#searchContainer div.is_help {
+	margin: 5px;
+}
+
+#filter_is_help {
+	display: inline-block;
+	margin-top: -3px;
+}
+
 #search {
 	display: inline-block;
 	border-radius: 4px 4px 4px 4px;
@@ -366,7 +400,7 @@ body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
 	margin: 5px;
 	border: 1px solid #AFAFAF;
 	position: absolute;
-	top: 68px;
+	top: 95px;
 	bottom: 5px;
 	left: 5px;
 	right: 5px;
@@ -565,6 +599,11 @@ body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
 #pan_link_a.active {
 	background: url('../img/sm-icons.png') 0 -125px;
 	cursor: pointer;
+}
+
+#editorContainer form div.auto-link {
+	margin: -5px 0 5px 90px;
+	font-size: 12px;
 }
 
 #editorContainer form .group-submit {

@@ -16,9 +16,12 @@
 		templates: ['osmPopupTemplate', 'stopPopupTemplate', 'stopPopupInfoTemplate', 'searchResultsTemplate', 'userLogsTemplate'],
 
 		init: function () {
+			this.setDomOptions();
+			this.compileTemplates();
+		},
+
+		initModules: function () {
 			try {
-				this.setDomOptions();
-				this.compileTemplates();
 				$.sm.common.init();
 				$.sm.map.init();
 				$.sm.searcher.init();
@@ -29,16 +32,6 @@
 			} catch (e) {
 				alert(e);
 			}
-		},
-
-		bindEvents: function () {
-		},
-
-		showErrorPopup: function () {
-		},
-
-		setPopups: function () {
-
 		},
 
 		setDomOptions: function () {
@@ -60,6 +53,12 @@
 					var name = htmlTemplates[templateIndex].name;
 					$.templates[name] = Mustache.compile(htmlTemplates[templateIndex].html);
 				}
+				window.setTimeout(function() {
+					context.initModules();
+					$('img').imagesLoaded( function () {
+						$.view.$body.removeClass('loading');
+					});
+				}, 1000);
 			});
 		}
 	});

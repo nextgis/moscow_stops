@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 	<meta charset="utf-8">
-	<title>Менеджер станций</title>
+	<title>Редактор остановок общественного транспорта</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width">
 
@@ -15,10 +15,10 @@
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css"/>
 	<![endif]-->
 
-	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/MarkerCluster.css')}" />
+##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/MarkerCluster.css')}" />
 
-	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/MarkerCluster.Default.css')}" />
-	<!--[if lte IE 8]><link rel="stylesheet" href="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/MarkerCluster.Default.ie.css')}" /><![endif]-->
+##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/MarkerCluster.Default.css')}" />
+	<!--[if lte IE 8]><!--<link rel="stylesheet" href="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/MarkerCluster.Default.ie.css')}" />--><![endif]-->
 
 	<script type="text/javascript">
 		document['url_root'] = '${request.route_url('home')}';
@@ -26,10 +26,11 @@
 	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.0/mustache.min.js"></script>
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 	<script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
-	<script src="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/leaflet.markercluster-src.js')}"></script>
+##	<script src="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/leaflet.markercluster-src.js')}"></script>
 
 	<script type="text/javascript" src="${request.static_url('moscow_stops:static/build/sm.min.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/tagsinput/jquery.tagsinput.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/jquery.imagesloaded.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/mustache.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.loader.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.helpers.js')}"></script>
@@ -42,11 +43,15 @@
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.stops.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.user.js')}"></script>
 </head>
-<body class="searcher-collapsed">
+<body class="searcher-collapsed loading">
+<div class="loading">
+	<img src="${request.static_url('moscow_stops:static/img/sm-loading.png')}"/>
+	<span>Инициализация</br>редактора...</span>
+</div>
 <div class="popup-background"></div>
 <div id="popup">
 	<a class="close"></a>
-	<div class="header">sadfasdfasdf</div>
+	<div class="header"></div>
 	<div class="content"></div>
 </div>
 <div class="main-loader"></div>
@@ -89,8 +94,14 @@ class="inner"
 		<fieldset>
 			<input id="filter_name" type="text" class="input-name" placeholder="Название">
 			<input id="filter_id" type="text" class="input-id" placeholder="ID">
-			<div id="search" class="inactive" title="Поиск">
+			<div id="search" class="active" title="Поиск">
 				<span></span>
+			</div>
+		</fieldset>
+		<fieldset>
+			<div class="is_help">
+				<input type="checkbox" id="filter_is_help">
+				<label for="filter_is_help">Нужна помощь</label>
 			</div>
 		</fieldset>
 	</form>
@@ -188,12 +199,15 @@ class="inner"
 					<a id="pan_link_a" target="_blank"></a>
 				</div>
 			</div>
+			<div class="group auto-link">
+				<a id="auto_link" target="_blank">Авто-ссылка</a>
+			</div>
 			<div class="group">
-				<label class="control-label top" for="comment">Комментарий</label>
+				<label class="control-label top" for="comment">Коммента-</br>рий</label>
 				<textarea id="comment" name="comment" disabled="disabled"></textarea>
 			</div>
 			<div class="group">
-				<label class="control-label" for="is_check">Проверка на местности</label>
+				<label class="control-label" for="is_check">Проверка</br>на мест-</br>ности</label>
 				<select id="is_check" name="is_check" class="stand" disabled="disabled">
 					<option value="0">Не нужна</option>
 					<option value="1">Нужна</option>

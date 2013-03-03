@@ -32,13 +32,15 @@ def get(context, request):
 	if 'filter' in request.GET:
 		filter = json.loads(request.GET['filter'])
 		name = filter['name'].encode('UTF-8')
-		if filter['id'].isdigit() or name.strip():
+		if filter['id'] or name.strip() or filter['is_help']:
 			if name.__len__() > 3:
 				name = '%' + name + '%'
 				clauses.append(Stop.name.ilike(name))
 			if filter['id'].isdigit():
 				id = int(filter['id'])
 				clauses.append(Stop.id == id)
+			if filter['is_help']:
+				clauses.append(Stop.is_help == True)
 		else:
 			clauses.append(Stop.geom.within(box_geom))
 

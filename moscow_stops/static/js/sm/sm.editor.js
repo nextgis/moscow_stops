@@ -245,6 +245,7 @@
 			$('#is_shelter').val(helpers.boolToString(stop.is_shelter, true));
 			$('#is_bench').val(helpers.boolToString(stop.is_bench, true));
 			$('#pan_link').val(helpers.valueNullToString(stop.panorama_link));
+			$('#auto_link').prop('href', this.getPanoramaAutoLink(stop.geom));
 			$('#comment').val(helpers.valueNullToString(stop.comment));
 			$('#is_check').val(stop.is_check);
 
@@ -255,7 +256,14 @@
 				$('#is_help').val(0);
 				$('#chb_is_help').prop('checked', false);
 			}
+		},
 
+		getPanoramaAutoLink: function (stopGeom) {
+			var coordinateCenter = stopGeom.lon + ',' + stopGeom.lat;
+			// API from http://clubs.ya.ru/mapsapi/replies.xml?item_no=6331
+			return 'http://maps.yandex.ru/?ll=' + coordinateCenter +
+				'&spn=0.011795,0.004087&l=map,stv&ol=stv&oll=' + coordinateCenter +
+				'&ost=dir:0,0~spn:90,73.739795';
 		},
 
 		fillRoutes: function (routes) {
@@ -345,6 +353,7 @@
 			v.$editorContainer.find('input:checkbox').prop('checked', false);
 			v.$editorContainer.find('input, select, textarea, button').attr('disabled', 'disabled');
 			v.$editorContainer.find('form').addClass('disabled');
+			$('#auto_link').prop('href', '');
 			$('#routes').importTags('');
 			$.view.$document.trigger('/sm/map/updateAllLayers');
 		}

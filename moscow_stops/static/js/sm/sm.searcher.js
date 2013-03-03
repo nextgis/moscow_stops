@@ -1,13 +1,14 @@
 (function ($) {
 	$.extend($.viewmodel, {
 		searcherCollapsed: false,
-		filter: {'id' : '', 'name' : ''},
-		isFilterValidated: false
+		filter: {'id' : '', 'name' : '', 'is_help' : ''},
+		isFilterValidated: true
 	});
 	$.extend($.view, {
 		$searchContainer: null,
 		$filterName: null,
 		$filterId: null,
+		$filterIsHelp: null,
 		$searchButton: null,
 		$searchResults: null
 	});
@@ -21,38 +22,42 @@
 		},
 
 		bindEvents: function () {
-			var context = this;
-			$.view.$searchContainer.find('span.icon-collapse, div.title').off('click').on('click', function () {
+			var context = this,
+				v = $.view;
+			v.$searchContainer.find('span.icon-collapse, div.title').off('click').on('click', function () {
 				$.viewmodel.searcherCollapsed = !$.viewmodel.searcherCollapsed;
 				$.view.$body.toggleClass('searcher-collapsed', context.searcherCollapsed);
 			});
-			$.view.$filterName.off('keyup').on('keyup', function (e) {
+			v.$filterName.off('keyup').on('keyup', function (e) {
 				context.keyUpHandler(e);
 			});
-			$.view.$filterId.off('keyup').on('keyup', function (e) {
+			v.$filterId.off('keyup').on('keyup', function (e) {
 				context.keyUpHandler(e);
 			});
 			$('#filter_name, #filter_id').off('focus').on('focus', function () {
 				$.view.$searchResults.prop('class', 'description');
 			});
+//			v.$filterIsHelp.off('change').on('change', function() {
+//				context.updateFilter();
+//			});
 			$('#searchResults p.description').off('click').on('click', function () {
 				$.view.$searchResults.prop('class', 'active');
 			});
-			$.view.$searchButton.off('click').on('click', function () {
+			v.$searchButton.off('click').on('click', function () {
 				if ($.viewmodel.isFilterValidated) {
 					context.applyFilter();
 				}
 			});
-			$.view.$document.on('/sm/searcher/update', function () {
+			v.$document.on('/sm/searcher/update', function () {
 				context.updateSearch();
 			});
-			$.view.$document.on('/sm/stops/startUpdate', function () {
+			v.$document.on('/sm/stops/startUpdate', function () {
 				var v = $.view;
 				v.$searchResults.prop('class', 'update');
 				v.$filterName.prop('disabled', true);
 				v.$filterId.prop('disabled', true);
 			});
-			$.view.$document.on('/sm/stops/endUpdate', function () {
+			v.$document.on('/sm/stops/endUpdate', function () {
 				var v = $.view;
 				v.$searchResults.prop('class', 'active');
 				v.$filterName.prop('disabled', false);
@@ -61,12 +66,20 @@
 		},
 
 		setDomOptions: function () {
-			$.view.$searchContainer = $('#searchContainer');
-			$.view.$filterName = $('#filter_name');
-			$.view.$filterId = $('#filter_id');
-			$.view.$searchButton = $('#search');
-			$.view.$searchResults = $('#searchResults');
+			var v = $.view;
+			v.$searchContainer = $('#searchContainer');
+			v.$filterName = $('#filter_name');
+			v.$filterId = $('#filter_id');
+			v.$filterIsHelp = $('#filter_is_help');
+			v.$searchButton = $('#search');
+			v.$searchResults = $('#searchResults');
+		},
 
+		keyUpHandler: function (e) {
+			this.validateSearch();
+			if(e.keyCode == 13) {
+				this.applyFilter();
+			}
 		},
 
 		validateSearch: function () {
@@ -97,14 +110,8 @@
 			} else {
 				vm.isFilterValidated = false;
 			}
-		},
 
-		updateUI: function () {
 			$.view.$searchButton.toggleClass('active', $.viewmodel.isFilterValidated);
-		},
-
-		search: function () {
-			$.view.$document.trigger('/sm/stops/updateStops');
 		},
 
 		applyFilter: function () {
@@ -114,19 +121,16 @@
 			}
 		},
 
-		keyUpHandler: function (e) {
-			this.validateSearch();
-			this.updateUI();
-			if(e.keyCode == 13) {
-				this.applyFilter();
-			}
-		},
-
 		updateFilter: function () {
 			var $v = $.view,
 				vm = $.viewmodel;
-				vm.filter.name = $v.$filterName.val();
-				vm.filter.id = $v.$filterId.val();
+			vm.filter.name = $v.$filterName.val();
+			vm.filter.id = $v.$filterId.val();
+			vm.filter.is_help = $v.$filterIsHelp.is(':checked');
+		},
+
+		search: function () {
+			$.view.$document.trigger('/sm/stops/updateStops');
 		},
 
 		updateSearch: function () {
