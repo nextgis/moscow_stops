@@ -2056,7 +2056,9 @@ $.fn.imagesLoaded = function( callback ) {
 
 		buildStopPopup: function (stopId) {
 			return $.getJSON(document['url_root'] + 'stop/' + stopId,function (data) {
-				$.viewmodel.stopSelected = data.stop;
+				if (!$.viewmodel.editable) {
+					$.viewmodel.stopSelected = data.stop;
+				}
 				var helper = $.sm.helpers,
 					html = $.templates.stopPopupInfoTemplate({
 						id: data.stop.id,
