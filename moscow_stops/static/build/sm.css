@@ -812,6 +812,10 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 	font-weight: bold;
 }
 
+#unblock {
+	float: right;
+}
+
 #stop-popup div.edit button.block {
 	color: #ffdbd6;
 	background-color: #cc8774;

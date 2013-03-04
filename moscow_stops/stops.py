@@ -101,6 +101,10 @@ def get_stop(context, request):
 	if stop_from_db[0].is_block:
 		stops_result['stop']['user_block'] = stop_from_db[0].user_block.display_name
 
+	stops_result['stop']['is_unblock'] = ''
+	if 'u_id' in request.session and stop_from_db[0].is_block and request.session['u_id'] == stop_from_db[0].user_block.id:
+		stops_result['stop']['is_unblock'] = True
+
 	return Response(json.dumps(stops_result))
 
 @view_config(route_name='stop_block', request_method='GET')

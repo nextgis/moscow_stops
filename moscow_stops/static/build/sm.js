@@ -2071,12 +2071,24 @@ $.fn.imagesLoaded = function( callback ) {
 						isUserEditor: $.viewmodel.isAuth,
 						editDenied: $.viewmodel.editable || data.stop.is_block,
 						isBlock: data.stop.is_block,
-						userBlock: data.stop.user_block
+						userBlock: data.stop.user_block,
+						isUnBlock: data.stop.is_unblock
 					});
 				$('#stop-popup').removeClass('loader').empty().append(html);
 				$('button#edit').off('click').on('click', function (e) {
 					$.view.$document.trigger('/sm/editor/startEdit');
 				});
+				if (data.stop.is_unblock) {
+					$('#unblock').off('click').on('click', function (e) {
+						$.ajax({
+							type: 'GET',
+							url: document['url_root'] + 'stop/unblock/' + $.viewmodel.stopSelected.id
+						}).done(function () {
+							$.viewmodel.map.closePopup();
+							$.view.$document.trigger('/sm/map/updateAllLayers');
+						});
+					});
+				}
 			}).error(function () {
 					$('#stop-popup').removeClass('loader').empty().append('Error connection');
 				});

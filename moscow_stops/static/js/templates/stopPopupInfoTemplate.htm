@@ -33,8 +33,14 @@
 	</tr>
 	{{#isBlock}}
 	<tr class="block">
-		<td>Заблокировал</td>
-		<td>{{userBlock}}</td>
+		{{#isUnBlock}}
+			<td>Заблокирована вами</td>
+			<td><button class="btn btn-small btn-primary block" id="unblock" type="button">Разблокировать</button></td>
+		{{/isUnBlock}}
+		{{^isUnBlock}}
+			<td>Заблокировал</td>
+			<td>{{userBlock}}</td>
+		{{/isUnBlock}}
 	</tr>
 	{{/isBlock}}
 </table>
