@@ -27,15 +27,8 @@
 				$.viewmodel.editorCollapsed = !$.viewmodel.editorCollapsed;
 				$.view.$body.toggleClass('editor-collapsed', context.editorCollapsed);
 			});
-			$('#pan_link').off('input').on('input', function (e) {
-				var pan_link_a = document.getElementById('pan_link_a');
-				if (context.regex.url.test(e.target.value)) {
-					pan_link_a.className = 'active';
-					pan_link_a.href = e.target.value;
-				} else {
-					pan_link_a.className = '';
-					pan_link_a.href = '';
-				}
+			$('#pan_link').off('input').on('input', function () {
+				context.validateLink();
 			});
 			$.view.$document.on('/sm/editor/startEdit', function (e) {
 				context.startAjaxEdition();
@@ -95,6 +88,18 @@
 			var route_type_selected = $('#route_type').find(":selected").val();
 			$('#route_type_' + route_type_selected).show();
 			$.viewmodel.routeTypeSelected = route_type_selected;
+		},
+
+		validateLink: function () {
+			var pan_link_a = $('#pan_link_a'),
+				val = $('#pan_link').val();
+			if (this.regex.url.test(val)) {
+				pan_link_a.attr('class', 'active')
+					.prop('href', val);
+			} else {
+				pan_link_a.removeAttr('href')
+					.attr('class', '');
+			}
 		},
 
 		save: function () {
@@ -245,6 +250,7 @@
 			$('#is_shelter').val(helpers.boolToString(stop.is_shelter, true));
 			$('#is_bench').val(helpers.boolToString(stop.is_bench, true));
 			$('#pan_link').val(helpers.valueNullToString(stop.panorama_link));
+			this.validateLink();
 			$('#auto_link').prop('href', this.getPanoramaAutoLink(stop.geom));
 			$('#comment').val(helpers.valueNullToString(stop.comment));
 			$('#is_check').val(stop.is_check);
