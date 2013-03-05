@@ -236,10 +236,10 @@
 			for (var i = 0, tl = stop.types.length; i < tl; i += 1) {
 				$('#stype_' + stop.types[i].id).prop('checked', true);
 			}
-			if (stop.types.length > 0 && stop.types[0].id == 0) {
+			if (stop.types.length > 0 && stop.types[0].id === 0) {
 				$('#types .parameters input').not('#stype_0').prop('checked', false).not('#other_stype').prop('disabled', true);
 				$('#types .parameter.sub label').addClass('disabled');
-			} else if (stop.types.length > 0 && stop.types[0].id != 0) {
+			} else if (stop.types.length > 0 && stop.types[0].id !== 0) {
 				$('#types .parameters input').not('#stype_0').prop('disabled', false);
 				$('#other_stype').prop('checked', true);
 				$('#types .parameter.sub label').removeClass('disabled');
@@ -253,7 +253,7 @@
 			this.validateLink();
 			$('#auto_link').prop('href', this.getPanoramaAutoLink(stop.geom));
 			$('#comment').val(helpers.valueNullToString(stop.comment));
-			$('#is_check').val(stop.is_check);
+			$('#is_check').val(stop.check_status);
 
 			if (stop.is_help) {
 				$('#is_help').val(1);
