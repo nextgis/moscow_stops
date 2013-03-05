@@ -672,16 +672,26 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 	right: 322px;
 }
 
+#map .leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 1px;
+}
+
+#map .leaflet-left .leaflet-control-scale {
+	margin-left: 15px;
+}
+
 #map .osm-popup {
 	min-width: 120px;
 }
 
 #map .osm-bus-stop {
 	background: url('../img/sm-icons.png') -80px 0;
+	z-index: 300 !important;
 }
 
 #map .stop-edit {
 	background: url('../img/sm-icons.png') -0px -145px;
+
 }
 
 #map .stop-edit:hover {
