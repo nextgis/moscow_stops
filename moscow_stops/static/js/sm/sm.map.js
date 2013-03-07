@@ -5,7 +5,7 @@
 		isPopupOpened: false
 	});
 	$.extend($.view, {
-
+		$map: null
 	});
 
 	$.sm.map = {};
@@ -13,6 +13,7 @@
 		init: function () {
 			this.setDomOptions();
 			this.buildMap();
+			this.buildLayerManager();
 			this.bindEvents();
 		},
 
@@ -49,18 +50,16 @@
 
 		buildMap: function () {
 			var context = this,
-				osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-				osmAttr = 'Map data © OpenStreetMap contributors',
-				osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 18, attribution: osmAttr}),
+				vm = $.viewmodel,
 				selectLayer = L.layerGroup();
-			$.viewmodel.map = new L.Map('map');
-			$.viewmodel.map.setView(new L.LatLng(55.742, 37.658), 15);
-			$.viewmodel.map.addLayer(osm);
-			$.viewmodel.mapLayers['osm'] = osm;
-			$.viewmodel.get_bbox = context.getBbox;
+			$.view.$map = $('#map');
+			vm.map = new L.Map('map');
+			L.control.scale().addTo(vm.map);
+			vm.map.setView(new L.LatLng(55.742, 37.658), 15);
+			vm.get_bbox = context.getBbox;
 
-			$.viewmodel.map.addLayer(selectLayer);
-			$.viewmodel.mapLayers['select'] = selectLayer;
+			vm.map.addLayer(selectLayer);
+			vm.mapLayers['select'] = selectLayer;
 		}
 	});
 })(jQuery);

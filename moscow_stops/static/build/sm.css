@@ -308,6 +308,7 @@ body.searcher-collapsed #searchContainer {
 	height: 32px;
 	background-color: #f5f5f5;
 	border-radius: 4px 4px 4px 4px;
+	top: 60px;
 }
 
 body.searcher-collapsed #searchContainer div.title,
@@ -333,7 +334,7 @@ body.searcher-collapsed #searchContainer span.icon-collapse:hover {
 }
 
 body.searcher-collapsed #map .leaflet-control-container .leaflet-top {
-	top: 40px;
+	top: -7px;
 }
 
 body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
@@ -458,6 +459,65 @@ body.searcher-collapsed #map .leaflet-control-container .leaflet-left {
 	color: #BD9C19;
 }
 
+body #manager {
+	position: absolute;
+	left: 310px;
+	top: 61px;
+	width: 32px;
+}
+
+body.searcher-collapsed #manager {
+	top: 105px;
+	left: 3px;
+}
+
+#manager div.group {
+	width: 37px;
+	height: 70px;
+	border: 1px solid #AFAFAF;
+	border-radius: 4px 4px 4px 4px;
+	background-color: #F5F5F5;
+}
+
+#manager div.group div.icon {
+	width: 30px;
+	height: 30px;
+	margin: 2px 2px;
+	border: 1px solid #cccccc;
+	border-radius: 4px 4px 4px 4px;
+	cursor: pointer;
+}
+
+#manager div.icon button {
+	display: block;
+	width: 28px;
+	height: 28px;
+	margin: 2px 0 0 2px;
+	border: none;
+}
+
+#manager div.icon.osm button {
+	background: url('../img/sm-icons.png') -50px -35px;
+}
+
+#manager div.icon.bing button {
+	background: url('../img/sm-icons.png') -105px -35px;
+}
+
+body.osm #manager div.icon.osm button,
+#manager div.icon.osm:hover button {
+	background: url('../img/sm-icons.png') -77px -35px;
+}
+
+body.bing #manager div.icon.bing button,
+#manager div.icon.bing:hover button {
+	background: url('../img/sm-icons.png') -133px -35px;
+}
+
+body.osm #manager div.icon.osm,
+body.bing #manager div.icon.bing {
+	border: 1px solid #838383;
+}
 
 #editorContainer {
 	right: 5px;position: absolute;
@@ -731,7 +791,7 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 }
 
 #map .leaflet-control-container .leaflet-left {
-	left: 300px;
+	left: 305px;
 }
 
 #map .leaflet-control-container .leaflet-bottom {
@@ -742,16 +802,26 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 	right: 322px;
 }
 
+#map .leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 1px;
+}
+
+#map .leaflet-left .leaflet-control-scale {
+	margin-left: 15px;
+}
+
 #map .osm-popup {
 	min-width: 120px;
 }
 
 #map .osm-bus-stop {
 	background: url('../img/sm-icons.png') -80px 0;
+	z-index: 300 !important;
 }
 
 #map .stop-edit {
 	background: url('../img/sm-icons.png') -0px -145px;
+
 }
 
 #map .stop-edit:hover {

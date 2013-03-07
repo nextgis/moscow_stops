@@ -13,12 +13,14 @@
 		<concat destfile="static/build/sm.js">
 			<file file="static/js/tagsinput/jquery.tagsinput.js"/>
 			<file file="static/js/jquery.imagesloaded.js"/>
+			<file file="static/js/leaflet/bing.js"/>
 			<file file="static/js/mustache.js"/>
 			<file file="static/js/sm/sm.loader.js"/>
 			<file file="static/js/sm/sm.helpers.js"/>
 			<file file="static/js/sm/sm.common.js"/>
 			<file file="static/js/sm/sm.map.js"/>
 			<file file="static/js/sm/sm.map.helpers.js"/>
+			<file file="static/js/sm/sm.map.manager.js"/>
 			<file file="static/js/sm/sm.searcher.js"/>
 			<file file="static/js/sm/sm.editor.js"/>
 			<file file="static/js/sm/sm.osm.js"/>

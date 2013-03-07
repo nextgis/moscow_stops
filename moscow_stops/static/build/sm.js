@@ -476,7 +476,123 @@ $.fn.imagesLoaded = function( callback ) {
 	return deferred ? deferred.promise( $this ) : $this;
 };
 
-})(jQuery);/*!
+})(jQuery);L.BingLayer = L.TileLayer.extend({
+	options: {
+		subdomains: [0, 1, 2, 3],
+		type: 'Aerial',
+		attribution: 'Bing',
+		culture: ''
+	},
+
+	initialize: function(key, options) {
+		L.Util.setOptions(this, options);
+
+		this._key = key;
+		this._url = null;
+		this.meta = {};
+		this.loadMetadata();
+	},
+
+	tile2quad: function(x, y, z) {
+		var quad = '';
+		for (var i = z; i > 0; i--) {
+			var digit = 0;
+			var mask = 1 << (i - 1);
+			if ((x & mask) != 0) digit += 1;
+			if ((y & mask) != 0) digit += 2;
+			quad = quad + digit;
+		}
+		return quad;
+	},
+
+	getTileUrl: function(p, z) {
+		var z = this._getZoomForUrl();
+		var subdomains = this.options.subdomains,
+			s = this.options.subdomains[Math.abs((p.x + p.y) % subdomains.length)];
+		return this._url.replace('{subdomain}', s)
+			.replace('{quadkey}', this.tile2quad(p.x, p.y, z))
+			.replace('{culture}', this.options.culture);
+	},
+
+	loadMetadata: function() {
+		var _this = this;
+		var cbid = '_bing_metadata_' + L.Util.stamp(this);
+		window[cbid] = function (meta) {
+			_this.meta = meta;
+			window[cbid] = undefined;
+			var e = document.getElementById(cbid);
+			e.parentNode.removeChild(e);
+			if (meta.errorDetails) {
+				alert("Got metadata" + meta.errorDetails);
+				return;
+			}
+			_this.initMetadata();
+		};
+		var url = "http://dev.virtualearth.net/REST/v1/Imagery/Metadata/" + this.options.type + "?include=ImageryProviders&jsonp=" + cbid + "&key=" + this._key;
+		var script = document.createElement("script");
+		script.type = "text/javascript";
+		script.src = url;
+		script.id = cbid;
+		document.getElementsByTagName("head")[0].appendChild(script);
+	},
+
+	initMetadata: function() {
+		var r = this.meta.resourceSets[0].resources[0];
+		this.options.subdomains = r.imageUrlSubdomains;
+		this._url = r.imageUrl;
+		this._providers = [];
+		for (var i = 0; i < r.imageryProviders.length; i++) {
+			var p = r.imageryProviders[i];
+			for (var j = 0; j < p.coverageAreas.length; j++) {
+				var c = p.coverageAreas[j];
+				var coverage = {zoomMin: c.zoomMin, zoomMax: c.zoomMax, active: false};
+				var bounds = new L.LatLngBounds(
+					new L.LatLng(c.bbox[0]+0.01, c.bbox[1]+0.01),
+					new L.LatLng(c.bbox[2]-0.01, c.bbox[3]-0.01)
+				);
+				coverage.bounds = bounds;
+				coverage.attrib = p.attribution;
+				this._providers.push(coverage);
+			}
+		}
+		this._update();
+	},
+
+	_update: function() {
+		if (this._url == null || !this._map) return;
+		this._update_attribution();
+		L.TileLayer.prototype._update.apply(this, []);
+	},
+
+	_update_attribution: function() {
+		var bounds = this._map.getBounds();
+		var zoom = this._map.getZoom();
+		for (var i = 0; i < this._providers.length; i++) {
+			var p = this._providers[i];
+			if ((zoom <= p.zoomMax && zoom >= p.zoomMin) &&
+				bounds.intersects(p.bounds)) {
+				if (!p.active)
+					this._map.attributionControl.addAttribution(p.attrib);
+				p.active = true;
+			} else {
+				if (p.active)
+					this._map.attributionControl.removeAttribution(p.attrib);
+				p.active = false;
+			}
+		}
+	},
+
+	onRemove: function(map) {
+		for (var i = 0; i < this._providers.length; i++) {
+			var p = this._providers[i];
+			if (p.active) {
+				this._map.attributionControl.removeAttribution(p.attrib);
+				p.active = false;
+			}
+		}
+		L.TileLayer.prototype.onRemove.apply(this, [map]);
+	}
+});/*!
  * mustache.js - Logic-less {{mustache}} templates with JavaScript
  * http://github.com/janl/mustache.js
  */
@@ -1034,7 +1150,7 @@ $.fn.imagesLoaded = function( callback ) {
 		},
 
 		initModules: function () {
-			try {
+//			try {
 				$.sm.common.init();
 				$.sm.map.init();
 				$.sm.searcher.init();
@@ -1042,9 +1158,9 @@ $.fn.imagesLoaded = function( callback ) {
 				$.sm.osm.init();
 				$.sm.user.init();
 				$.sm.stops.init();
-			} catch (e) {
-				alert(e);
-			}
+//			} catch (e) {
+//				alert(e);
+//			}
 		},
 
 		setDomOptions: function () {
@@ -1223,7 +1339,7 @@ $.fn.imagesLoaded = function( callback ) {
 		isPopupOpened: false
 	});
 	$.extend($.view, {
-
+		$map: null
 	});
 
 	$.sm.map = {};
@@ -1231,6 +1347,7 @@ $.fn.imagesLoaded = function( callback ) {
 		init: function () {
 			this.setDomOptions();
 			this.buildMap();
+			this.buildLayerManager();
 			this.bindEvents();
 		},
 
@@ -1267,18 +1384,16 @@ $.fn.imagesLoaded = function( callback ) {
 
 		buildMap: function () {
 			var context = this,
-				osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-				osmAttr = 'Map data © OpenStreetMap contributors',
-				osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 18, attribution: osmAttr}),
+				vm = $.viewmodel,
 				selectLayer = L.layerGroup();
-			$.viewmodel.map = new L.Map('map');
-			$.viewmodel.map.setView(new L.LatLng(55.742, 37.658), 15);
-			$.viewmodel.map.addLayer(osm);
-			$.viewmodel.mapLayers['osm'] = osm;
-			$.viewmodel.get_bbox = context.getBbox;
+			$.view.$map = $('#map');
+			vm.map = new L.Map('map');
+			L.control.scale().addTo(vm.map);
+			vm.map.setView(new L.LatLng(55.742, 37.658), 15);
+			vm.get_bbox = context.getBbox;
 
-			$.viewmodel.map.addLayer(selectLayer);
-			$.viewmodel.mapLayers['select'] = selectLayer;
+			vm.map.addLayer(selectLayer);
+			vm.mapLayers['select'] = selectLayer;
 		}
 	});
 })(jQuery);
@@ -1293,6 +1408,71 @@ $.fn.imagesLoaded = function( callback ) {
 				popupAnchor: [0, 2 - (iconSize / 2)]
 			});
 		}
+	});
+})(jQuery);(function ($) {
+	$.extend($.viewmodel, {
+		currentTileLayer: null
+	});
+	$.extend($.view, {
+		$tileLayers: null,
+		$manager: null
+	});
+
+	$.extend($.sm.map, {
+		_layers: {},
+		_lastIndex: 0,
+
+		buildLayerManager: function () {
+			var v = $.view;
+			$.view.$manager = $('#manager');
+			this.addTileLayer('osm', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 'Map data © OpenStreetMap contributors');
+			this.addBingLayer('AujH--7B6FRTK8b81QgPhuvw_Sb3kc8hBO-Lp5OLNyhCD4ZQoGGW4cQS6zBgaeEh');
+			$.view.$tileLayers = v.$map.find('div.leaflet-tile-pane div.leaflet-layer');
+			this.bindLayerManagerEvents();
+			this.onLayer('osm');
+		},
+
+		bindLayerManagerEvents: function () {
+			var context = this;
+			$.viewmodel.map.off('zoomend').on('zoomend', function () {
+				context.onLayer();
+			});
+			$.view.$manager.find('div.tile-layers div.icon').off('click').on('click', function (e) {
+				context.onLayer($(this).data('layer'));
+			});
+		},
+
+		onLayer: function (nameLayer) {
+			var vm = $.viewmodel,
+				v = $.view,
+				$tileLayers = $($.viewmodel.map.getPanes().tilePane).find('div.leaflet-layer');
+			if (nameLayer) {
+				v.$body.removeClass(vm.currentTileLayer).addClass(nameLayer);
+				vm.currentTileLayer = nameLayer;
+				$tileLayers.hide().eq(this._layers[nameLayer].index).show();
+			} else {
+				$tileLayers.hide().eq(this._layers[vm.currentTileLayer].index).show();
+			}
+		},
+
+		addTileLayer: function (nameLayer, url, attribution) {
+			var layer = new L.TileLayer(url, {minZoom: 8, maxZoom: 18, attribution: attribution});
+			this._layers[nameLayer] = {
+				'layer' : $.viewmodel.map.addLayer(layer, true),
+				'index' : this._lastIndex
+			};
+			this._lastIndex =+ 1;
+		},
+
+		addBingLayer: function (key) {
+			var bingLayer = new L.BingLayer(key);
+			this._layers['bing'] = {
+				'layer' : $.viewmodel.map.addLayer(bingLayer, true),
+				'index' : this._lastIndex
+			};
+			this._lastIndex =+ 1;
+		}
+
 	});
 })(jQuery);(function ($) {
 	$.extend($.viewmodel, {

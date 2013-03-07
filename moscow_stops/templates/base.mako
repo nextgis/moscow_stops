@@ -31,18 +31,20 @@
 	<script type="text/javascript" src="${request.static_url('moscow_stops:static/build/sm.min.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/tagsinput/jquery.tagsinput.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/jquery.imagesloaded.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/leaflet/bing.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/mustache.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.loader.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.helpers.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.common.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.helpers.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.manager.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.searcher.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.editor.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.osm.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.stops.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.user.js')}"></script>
-</head>
+	</head>
 <body class="searcher-collapsed loading">
 <div class="loading">
 	<img src="${request.static_url('moscow_stops:static/img/sm-loading.png')}"/>
@@ -111,6 +113,16 @@ class="inner"
 			Для отображения списка остановок кликните на эту область
 		</p>
 		<div></div>
+	</div>
+</div>
+<div id="manager">
+	<div class="group tile-layers">
+		<div class="icon osm" title="Слой Openstreetmap" data-layer="osm">
+			<button></button>
+		</div>
+		<div class="icon bing" title="Слой Bing" data-layer="bing">
+			<button></button>
+		</div>
 	</div>
 </div>
 <div id="editorContainer">

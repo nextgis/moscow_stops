@@ -21,7 +21,7 @@
 		},
 
 		initModules: function () {
-			try {
+//			try {
 				$.sm.common.init();
 				$.sm.map.init();
 				$.sm.searcher.init();
@@ -29,9 +29,9 @@
 				$.sm.osm.init();
 				$.sm.user.init();
 				$.sm.stops.init();
-			} catch (e) {
-				alert(e);
-			}
+//			} catch (e) {
+//				alert(e);
+//			}
 		},
 
 		setDomOptions: function () {
