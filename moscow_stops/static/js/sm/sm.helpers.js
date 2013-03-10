@@ -28,7 +28,7 @@
 					return is_coded ? 'null' : '';
 					break;
 				case true:
-					return is_coded ? 'true' : 'Да'
+					return is_coded ? 'true' : 'Да';
 					break;
 				case false:
 					return is_coded ? 'false' : 'Нет';
@@ -48,10 +48,13 @@
 					return 'Не нужна';
 					break;
 				case 1:
-					return 'Нужна'
+					return 'Нужна';
 					break;
 				case 2:
-					return 'Проверена'
+					return 'Проверена';
+					break;
+				default:
+					return 'Не нужна';
 					break;
 			}
 		},

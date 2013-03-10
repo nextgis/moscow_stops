@@ -22,7 +22,7 @@ requires = [
     ]
 
 setup(name='moscow_stops',
-      version='0.0',
+      version='0.1',
       description='moscow_stops',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[

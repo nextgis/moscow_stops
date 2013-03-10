@@ -100,9 +100,14 @@ body.popup #popup {
 }
 
 #popup div.content table.logs {
-	width: auto;
+	width: 350px;
 	margin: 15px;
+}
 
+#popup div.content table.logs caption {
+	color: #444444;
+	font-size: 15px;
+	font-weight: bold;
 }
 
 #popup div.content table.logs td {
@@ -751,7 +756,7 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 
 #map .stop-edit {
 	background: url('../img/sm-icons.png') -0px -145px;
-
+	z-index: 310 !important;
 }
 
 #map .stop-edit:hover {
@@ -760,6 +765,7 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 
 #map .stop-check {
 	background: url('../img/sm-icons.png') -40px -145px;
+	z-index: 305 !important;
 }
 
 #map .stop-check:hover {
@@ -768,10 +774,12 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 
 #map .stop-editable {
 	background: url('../img/sm-icons.png') -25px -165px;
+	z-index: 320 !important;
 }
 
 #map .stop-block {
 	background: url('../img/sm-icons.png') -80px -145px;
+	z-index: 315 !important;
 }
 
 #map .stop-block:hover {

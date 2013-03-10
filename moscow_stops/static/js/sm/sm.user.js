@@ -36,7 +36,12 @@
 				url: url,
 				dataType: 'json',
 				success: function(data) {
-					var html = $.templates.userLogsTemplate({ user_logs: data });
+					var html = $.templates.userLogsTemplate({
+						user_logs: data.stops_by_users,
+						count_all: data.count.all,
+						count_editable: data.count.editable,
+						percent: (data.count.editable / data.count.all * 100).toFixed(2)
+					});
 					$.view.$body.removeClass('loader');
 					$.view.$document.trigger('/sm/common/openPopup', ['Статистика пользователей', html]);
 				}

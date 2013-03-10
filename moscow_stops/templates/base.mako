@@ -33,6 +33,7 @@
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/jquery.imagesloaded.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/leaflet/bing.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/mustache.js')}"></script>
+####	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.templates.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.loader.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.helpers.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.common.js')}"></script>

@@ -1150,7 +1150,7 @@ $.fn.imagesLoaded = function( callback ) {
 		},
 
 		initModules: function () {
-//			try {
+			try {
 				$.sm.common.init();
 				$.sm.map.init();
 				$.sm.searcher.init();
@@ -1158,9 +1158,9 @@ $.fn.imagesLoaded = function( callback ) {
 				$.sm.osm.init();
 				$.sm.user.init();
 				$.sm.stops.init();
-//			} catch (e) {
-//				alert(e);
-//			}
+			} catch (e) {
+				alert(e);
+			}
 		},
 
 		setDomOptions: function () {
@@ -1225,7 +1225,7 @@ $.fn.imagesLoaded = function( callback ) {
 					return is_coded ? 'null' : '';
 					break;
 				case true:
-					return is_coded ? 'true' : 'Да'
+					return is_coded ? 'true' : 'Да';
 					break;
 				case false:
 					return is_coded ? 'false' : 'Нет';
@@ -1245,10 +1245,13 @@ $.fn.imagesLoaded = function( callback ) {
 					return 'Не нужна';
 					break;
 				case 1:
-					return 'Нужна'
+					return 'Нужна';
 					break;
 				case 2:
-					return 'Проверена'
+					return 'Проверена';
+					break;
+				default:
+					return 'Не нужна';
 					break;
 			}
 		},
@@ -1425,7 +1428,7 @@ $.fn.imagesLoaded = function( callback ) {
 		buildLayerManager: function () {
 			var v = $.view;
 			$.view.$manager = $('#manager');
-			this.addTileLayer('osm', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 'Map data © OpenStreetMap contributors');
+			this.addTileLayer('osm', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '© OpenStreetMap contributors');
 			this.addBingLayer('AujH--7B6FRTK8b81QgPhuvw_Sb3kc8hBO-Lp5OLNyhCD4ZQoGGW4cQS6zBgaeEh');
 			$.view.$tileLayers = v.$map.find('div.leaflet-tile-pane div.leaflet-layer');
 			this.bindLayerManagerEvents();
@@ -2329,7 +2332,12 @@ $.fn.imagesLoaded = function( callback ) {
 				url: url,
 				dataType: 'json',
 				success: function(data) {
-					var html = $.templates.userLogsTemplate({ user_logs: data });
+					var html = $.templates.userLogsTemplate({
+						user_logs: data.stops_by_users,
+						count_all: data.count.all,
+						count_editable: data.count.editable,
+						percent: (data.count.editable / data.count.all * 100).toFixed(2)
+					});
 					$.view.$body.removeClass('loader');
 					$.view.$document.trigger('/sm/common/openPopup', ['Статистика пользователей', html]);
 				}
