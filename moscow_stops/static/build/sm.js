@@ -1428,6 +1428,9 @@ $.fn.imagesLoaded = function( callback ) {
 		buildLayerManager: function () {
 			var v = $.view;
 			$.view.$manager = $('#manager');
+			// http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+			// http://{s}.tile.osmosnimki.ru/kosmo/{z}/{x}/{y}.png
+			// http://{s}.tiles.mapbox.com/v3/karavanjo.map-opq7bhsy/{z}/{x}/{y}.png
 			this.addTileLayer('osm', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '© OpenStreetMap contributors');
 			this.addBingLayer('AujH--7B6FRTK8b81QgPhuvw_Sb3kc8hBO-Lp5OLNyhCD4ZQoGGW4cQS6zBgaeEh');
 			$.view.$tileLayers = v.$map.find('div.leaflet-tile-pane div.leaflet-layer');
@@ -1468,7 +1471,7 @@ $.fn.imagesLoaded = function( callback ) {
 		},
 
 		addBingLayer: function (key) {
-			var bingLayer = new L.BingLayer(key);
+			var bingLayer = new L.BingLayer(key, {minZoom: 8, maxZoom: 19});
 			this._layers['bing'] = {
 				'layer' : $.viewmodel.map.addLayer(bingLayer, true),
 				'index' : this._lastIndex
