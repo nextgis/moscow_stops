@@ -24,6 +24,8 @@ sessionmaker,
 relationship,
 )
 
+from sqlalchemy.sql import select
+
 from zope.sqlalchemy import ZopeTransactionExtension
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
@@ -39,25 +41,37 @@ stopsStopType = Table('stops_stop_types', Base.metadata,
                       Column('stop_type_id', Integer, ForeignKey('stop_types.id'), nullable=False, primary_key=True)
 )
 
+stopsPhotos = Table('stops_photos', Base.metadata,
+                    Column('stop_id', Integer, ForeignKey('stops.id'), nullable=False, primary_key=True),
+                    Column('photo_id', Integer, ForeignKey('photos.id'), nullable=False, primary_key=True)
+)
+
 
 class Stop(Base):
     __tablename__ = 'stops'
 
     id = Column(Integer, Sequence('stops_id_seq'), primary_key=True)
-    geom = GeometryColumn(Geometry(2, 4326, bounding_box='(xmin=35, ymin=55, xmax=39, ymax=57)'), nullable=False)
+    geom = GeometryColumn(Geometry(2, 4326, bounding_box='(xmin=34, ymin=54, xmax=40, ymax=58)'), nullable=False)
     name = Column(Unicode(254), index=True, nullable=False)
     is_bench = Column(Boolean, nullable=True)
     is_shelter = Column(Boolean, nullable=True)
     stop_types = relationship('StopType', secondary=stopsStopType, backref='stops')
     comment = Column(Text, nullable=True)
     panorama_link = Column(Unicode(500))
-    check_status = Column(Integer, nullable=True, default=0)
-    routes = relationship("Route", secondary=stopsRoutes, backref='stops')
+    check_status_type = relationship('CheckStatusType')
+    check_status_type_id = Column(Integer, ForeignKey('check_status_types.id'), nullable=True)
+    routes = relationship('Route', secondary=stopsRoutes, backref='stops')
+    photos = relationship('Photo', secondary=stopsPhotos, backref='stops')
     is_block = Column(Boolean, nullable=True)
     user_block = relationship('User')
     user_block_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     is_help = Column(Boolean, nullable=True)
 
+class CheckStatusType(Base):
+    __tablename__ = 'check_status_types'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode(254))
 
 class StopType(Base):
     __tablename__ = 'stop_types'
@@ -82,6 +96,12 @@ class RouteType(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode(254), nullable=False)
 
+class Photo(Base):
+    __tablename__ = 'photos'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode(254), index=True, nullable=True)
+    link = Column(Unicode(254), index=True, nullable=True)
 
 class LogStops(Base):
     __tablename__ = 'log_stops'
@@ -92,6 +112,13 @@ class LogStops(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, primary_key=True)
     time = Column(DateTime, nullable=False, primary_key=True)
 
+class LogBlocks(Base):
+    __tablename__ = 'log_blocks'
+
+    user = relationship('User')
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, primary_key=True)
+    is_blocking = Column(Boolean, nullable=False)
+    time = Column(DateTime, nullable=False, primary_key=True)
 
 class User(Base):
     __tablename__ = 'users'

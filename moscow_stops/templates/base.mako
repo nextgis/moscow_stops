@@ -222,9 +222,9 @@ class="inner"
 			<div class="group">
 				<label class="control-label" for="is_check">Проверка</br>на мест-</br>ности</label>
 				<select id="is_check" name="is_check" class="stand" disabled="disabled">
-					<option value="0">Не нужна</option>
-					<option value="1">Нужна</option>
-					<option value="2">Проверена</option>
+					% for check_type in check_types:
+							<option value="${check_type.id}">${check_type.name}</option>
+					% endfor
 				</select>
 			</div>
 			<div class="group">

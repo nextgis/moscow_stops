@@ -253,7 +253,7 @@
 			this.validateLink();
 			$('#auto_link').prop('href', this.getPanoramaAutoLink(stop.geom));
 			$('#comment').val(helpers.valueNullToString(stop.comment));
-			$('#is_check').val(stop.check_status);
+			$('#is_check').val(stop.check_status_type_id);
 
 			if (stop.is_help) {
 				$('#is_help').val(1);

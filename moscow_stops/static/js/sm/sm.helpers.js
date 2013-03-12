@@ -53,6 +53,9 @@
 				case 2:
 					return 'Проверена';
 					break;
+				case 3:
+					return 'Проверена по Бингу';
+					break;
 				default:
 					return 'Не нужна';
 					break;

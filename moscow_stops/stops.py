@@ -151,7 +151,7 @@ def update_stop(context, request):
                                                              stop['is_shelter'],
                                                              Stop.comment: stop['comment'].encode('UTF-8'),
                                                              Stop.panorama_link: stop['panorama_link'],
-                                                             Stop.check_status: stop['is_check'],
+                                                             Stop.check_status_type_id: stop['is_check'],
                                                              Stop.is_help: str_to_boolean(stop['is_help'])
                                                              }, synchronize_session=False);
     # raw sql about https://groups.google.com/forum/?fromgroups=#!topic/geoalchemy/vSAlsuhwWfo

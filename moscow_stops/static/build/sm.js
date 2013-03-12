@@ -510,8 +510,8 @@ $.fn.imagesLoaded = function( callback ) {
 		var subdomains = this.options.subdomains,
 			s = this.options.subdomains[Math.abs((p.x + p.y) % subdomains.length)];
 		return this._url.replace('{subdomain}', s)
-			.replace('{quadkey}', this.tile2quad(p.x, p.y, z))
-			.replace('{culture}', this.options.culture);
+				.replace('{quadkey}', this.tile2quad(p.x, p.y, z))
+				.replace('{culture}', this.options.culture);
 	},
 
 	loadMetadata: function() {
@@ -547,8 +547,8 @@ $.fn.imagesLoaded = function( callback ) {
 				var c = p.coverageAreas[j];
 				var coverage = {zoomMin: c.zoomMin, zoomMax: c.zoomMax, active: false};
 				var bounds = new L.LatLngBounds(
-					new L.LatLng(c.bbox[0]+0.01, c.bbox[1]+0.01),
-					new L.LatLng(c.bbox[2]-0.01, c.bbox[3]-0.01)
+						new L.LatLng(c.bbox[0]+0.01, c.bbox[1]+0.01),
+						new L.LatLng(c.bbox[2]-0.01, c.bbox[3]-0.01)
 				);
 				coverage.bounds = bounds;
 				coverage.attrib = p.attribution;
@@ -570,7 +570,7 @@ $.fn.imagesLoaded = function( callback ) {
 		for (var i = 0; i < this._providers.length; i++) {
 			var p = this._providers[i];
 			if ((zoom <= p.zoomMax && zoom >= p.zoomMin) &&
-				bounds.intersects(p.bounds)) {
+					bounds.intersects(p.bounds)) {
 				if (!p.active)
 					this._map.attributionControl.addAttribution(p.attrib);
 				p.active = true;
@@ -590,9 +590,10 @@ $.fn.imagesLoaded = function( callback ) {
 				p.active = false;
 			}
 		}
-		L.TileLayer.prototype.onRemove.apply(this, [map]);
+        	L.TileLayer.prototype.onRemove.apply(this, [map]);
 	}
-});/*!
+});
+/*!
  * mustache.js - Logic-less {{mustache}} templates with JavaScript
  * http://github.com/janl/mustache.js
  */
@@ -1250,6 +1251,9 @@ $.fn.imagesLoaded = function( callback ) {
 				case 2:
 					return 'Проверена';
 					break;
+				case 3:
+					return 'Проверена по Бингу';
+					break;
 				default:
 					return 'Не нужна';
 					break;
@@ -1896,7 +1900,7 @@ $.fn.imagesLoaded = function( callback ) {
 			this.validateLink();
 			$('#auto_link').prop('href', this.getPanoramaAutoLink(stop.geom));
 			$('#comment').val(helpers.valueNullToString(stop.comment));
-			$('#is_check').val(stop.check_status);
+			$('#is_check').val(stop.check_status_type_id);
 
 			if (stop.is_help) {
 				$('#is_help').val(1);
@@ -2260,7 +2264,7 @@ $.fn.imagesLoaded = function( callback ) {
 						stop_type_id: helper.valueNullToString(data.stop.stop_type_id),
 						routes: data.stop.routes,
 						types: data.stop.types,
-						check_status: helper.valueCheckToString(data.stop.check_status),
+						check_status: helper.valueCheckToString(data.stop.check_status_type_id),
 						comment: helper.valueNullToString(data.stop.comment),
 						isUserEditor: $.viewmodel.isAuth,
 						editDenied: $.viewmodel.editable || data.stop.is_block,

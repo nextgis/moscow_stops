@@ -137,7 +137,7 @@
 						stop_type_id: helper.valueNullToString(data.stop.stop_type_id),
 						routes: data.stop.routes,
 						types: data.stop.types,
-						check_status: helper.valueCheckToString(data.stop.check_status),
+						check_status: helper.valueCheckToString(data.stop.check_status_type_id),
 						comment: helper.valueNullToString(data.stop.comment),
 						isUserEditor: $.viewmodel.isAuth,
 						editDenied: $.viewmodel.editable || data.stop.is_block,

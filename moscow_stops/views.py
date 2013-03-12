@@ -1,7 +1,7 @@
 from pyramid.response import Response
 from pyramid.view import view_config
 from sqlalchemy.exc import DBAPIError
-from models import Route
+from models import Route, CheckStatusType
 from sqlalchemy.sql.expression import asc
 from sqlalchemy.orm import joinedload
 from security import generate_session_id
@@ -10,7 +10,6 @@ import moscow_stops.models
 from .models import (
 DBSession,
 )
-
 
 @view_config(route_name='home', renderer='base.mako')
 def home_view(request):
@@ -29,8 +28,8 @@ def home_view(request):
     if hasattr(request, 'cookies') and 'sk' in request.cookies.keys() and 'sk' in request.session and request.session[
         'sk'] == request.cookies['sk'] and 'u_name' in request.session:
         user_name = request.session['u_name']
-    return {'u_name': user_name, 'routes': routes, 'routes_types': routes_types}
-
+    ckeck_types = session.query(CheckStatusType).order_by(asc(CheckStatusType.id))
+    return {'u_name': user_name, 'routes': routes, 'routes_types': routes_types, 'check_types': ckeck_types}
 
 @view_config(route_name='home', request_method='POST', renderer='base.mako')
 def home_signin(request):
