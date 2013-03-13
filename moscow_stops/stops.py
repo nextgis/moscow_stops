@@ -45,7 +45,10 @@ def get(context, request):
         else:
             clauses.append(Stop.geom.within(box_geom))
 
-    stops_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).options(joinedload(Stop.stop_types), joinedload(Stop.check_status_type)).filter(*clauses) \
+    stops_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y)\
+        .options(joinedload(Stop.stop_types), \
+                 joinedload(Stop.check_status_type)) \
+        .filter(*clauses) \
         .order_by(asc(Stop.is_block), asc(Stop.name))
 
     stops_result = {'stops': {
@@ -61,11 +64,7 @@ def get(context, request):
             stops_result['stops']['block']['elements'].append(stop_entity)
             stops_result['stops']['block']['count'] += 1
         else:
-            if len(stop[0].stop_types) == 0 \
-                or stop[0].panorama_link is None \
-                or stop[0].check_status_type is None \
-                or stop[0].check_status_type.name != u'Нужна' \
-                or stop[0].check_status_type.name != u'Проверена':
+            if ((stop[0].panorama_link is None) or (stop[0].panorama_link == '')) or (stop[0].check_status_type_id is None) or (stop[0].check_status_type_id == 0) or (stop[0].check_status_type_id == 3):
                 stops_result['stops']['non_block']['non_check']['elements'].append(stop_entity)
                 stops_result['stops']['non_block']['non_check']['count'] += 1
             else:
