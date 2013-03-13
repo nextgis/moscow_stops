@@ -64,12 +64,13 @@ def get(context, request):
             stops_result['stops']['block']['elements'].append(stop_entity)
             stops_result['stops']['block']['count'] += 1
         else:
-            if ((stop[0].panorama_link is None) or (stop[0].panorama_link == '')) or (stop[0].check_status_type_id is None) or (stop[0].check_status_type_id == 0) or (stop[0].check_status_type_id == 3):
-                stops_result['stops']['non_block']['non_check']['elements'].append(stop_entity)
-                stops_result['stops']['non_block']['non_check']['count'] += 1
-            else:
+            if (stop[0].panorama_link is not None and stop[0].panorama_link != '') or \
+                    (stop[0].check_status_type_id is not None and (stop[0].check_status_type_id == 1 or stop[0].check_status_type_id == 2)):
                 stops_result['stops']['non_block']['check']['elements'].append(stop_entity)
                 stops_result['stops']['non_block']['check']['count'] += 1
+            else:
+                stops_result['stops']['non_block']['non_check']['elements'].append(stop_entity)
+                stops_result['stops']['non_block']['non_check']['count'] += 1
 
     return Response(json.dumps(stops_result))
 
