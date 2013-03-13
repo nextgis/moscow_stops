@@ -55,7 +55,7 @@
 			$.view.$map = $('#map');
 			vm.map = new L.Map('map');
 			L.control.scale().addTo(vm.map);
-			vm.map.setView(new L.LatLng(55.742, 37.658), 15);
+			vm.map.setView(new L.LatLng(55.742, 37.658), 14);
 			vm.get_bbox = context.getBbox;
 
 			vm.map.addLayer(selectLayer);

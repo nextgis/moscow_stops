@@ -1396,7 +1396,7 @@ $.fn.imagesLoaded = function( callback ) {
 			$.view.$map = $('#map');
 			vm.map = new L.Map('map');
 			L.control.scale().addTo(vm.map);
-			vm.map.setView(new L.LatLng(55.742, 37.658), 15);
+			vm.map.setView(new L.LatLng(55.742, 37.658), 14);
 			vm.get_bbox = context.getBbox;
 
 			vm.map.addLayer(selectLayer);
@@ -2117,7 +2117,7 @@ $.fn.imagesLoaded = function( callback ) {
 		},
 
 		validateZoom: function () {
-			if ($.viewmodel.map.getZoom() < 15) {
+			if ($.viewmodel.map.getZoom() < 14) {
 				return false;
 			}
 			return true;
@@ -2293,7 +2293,7 @@ $.fn.imagesLoaded = function( callback ) {
 		},
 
 		validateZoom: function () {
-			if ($.viewmodel.map.getZoom() < 15) {
+			if ($.viewmodel.map.getZoom() < 14) {
 				return false;
 			}
 			return true;

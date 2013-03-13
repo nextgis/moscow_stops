@@ -166,7 +166,7 @@
 		},
 
 		validateZoom: function () {
-			if ($.viewmodel.map.getZoom() < 15) {
+			if ($.viewmodel.map.getZoom() < 14) {
 				return false;
 			}
 			return true;
