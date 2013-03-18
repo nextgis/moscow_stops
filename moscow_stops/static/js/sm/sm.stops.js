@@ -53,7 +53,7 @@
 				type: "GET",
 				url: url,
 				data: {
-					'bbox' : JSON.stringify($.viewmodel.get_bbox()),
+					'bbox' : JSON.stringify($.viewmodel.map.getBounds()),
 					'filter' : JSON.stringify(filter)
 				},
 				dataType: 'json',

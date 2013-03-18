@@ -1352,15 +1352,17 @@ $.fn.imagesLoaded = function( callback ) {
 	$.sm.map = {};
 	$.extend($.sm.map, {
 		init: function () {
-			this.setDomOptions();
 			this.buildMap();
 			this.buildLayerManager();
 			this.bindEvents();
 		},
 
 		bindEvents: function () {
+			var context = this;
 			$.viewmodel.map.on('moveend', function (e) {
+				var map = e.target;
 				$.view.$document.trigger('/sm/map/updateAllLayers');
+				context.setLastExtent(map.getCenter(), map.getZoom());
 			});
 			$.view.$document.on('/sm/map/updateAllLayers', function () {
 				$.view.$document.trigger('/sm/stops/updateStops');
@@ -1381,26 +1383,41 @@ $.fn.imagesLoaded = function( callback ) {
 			});
 		},
 
-		setDomOptions: function () {
-
-		},
-
-		getBbox: function () {
-			return this.map.getBounds();
-		},
-
 		buildMap: function () {
 			var context = this,
 				vm = $.viewmodel,
-				selectLayer = L.layerGroup();
+				selectLayer = L.layerGroup(),
+				lastExtent = this.getLastExtent();
 			$.view.$map = $('#map');
 			vm.map = new L.Map('map');
 			L.control.scale().addTo(vm.map);
-			vm.map.setView(new L.LatLng(55.742, 37.658), 14);
-			vm.get_bbox = context.getBbox;
+
+			if (lastExtent) {
+				vm.map.setView(lastExtent.latlng, lastExtent.zoom);
+			} else {
+				vm.map.setView(new L.LatLng(55.742, 37.658), 14);
+				this.setLastExtent(new L.LatLng(55.742, 37.658), 14);
+			}
 
 			vm.map.addLayer(selectLayer);
 			vm.mapLayers['select'] = selectLayer;
+		},
+
+		getLastExtent: function () {
+			var lat = parseFloat($.cookie('map.lat'), 10),
+				lng = parseFloat($.cookie('map.lng'), 10),
+				zoom = parseInt($.cookie('map.zoom'), 10);
+			if (lat && lng && zoom) {
+				return {'latlng': new L.LatLng(lat, lng), 'zoom': zoom};
+			} else {
+				return null;
+			}
+		},
+
+		setLastExtent: function (latLng, zoom) {
+			$.cookie('map.lat', latLng.lat, { expires: 7, path: '/' });
+			$.cookie('map.lng', latLng.lng, { expires: 7, path: '/' });
+			$.cookie('map.zoom', zoom, { expires: 7, path: '/' });
 		}
 	});
 })(jQuery);
@@ -2180,7 +2197,7 @@ $.fn.imagesLoaded = function( callback ) {
 				type: "GET",
 				url: url,
 				data: {
-					'bbox' : JSON.stringify($.viewmodel.get_bbox()),
+					'bbox' : JSON.stringify($.viewmodel.map.getBounds()),
 					'filter' : JSON.stringify(filter)
 				},
 				dataType: 'json',

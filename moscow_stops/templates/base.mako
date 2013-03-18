@@ -28,6 +28,7 @@
 	<script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
 ##	<script src="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/leaflet.markercluster-src.js')}"></script>
 
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/jquery/jquery.cookie.js')}"></script>
 	<script type="text/javascript" src="${request.static_url('moscow_stops:static/build/sm.min.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/tagsinput/jquery.tagsinput.js')}"></script>
 ##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/jquery.imagesloaded.js')}"></script>
