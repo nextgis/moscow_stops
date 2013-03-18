@@ -21,6 +21,7 @@
 			$.viewmodel.map.on('moveend', function (e) {
 				var map = e.target;
 				$.view.$document.trigger('/sm/map/updateAllLayers');
+				context.manageOsmLayer();
 				context.setLastExtent(map.getCenter(), map.getZoom());
 			});
 			$.view.$document.on('/sm/map/updateAllLayers', function () {

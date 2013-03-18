@@ -11,17 +11,25 @@
 		_layers: {},
 		_lastIndex: 0,
 
+		layersName: {
+			osm: 'osm',
+			osm19: 'osm_19',
+			bing: 'bing'
+		},
+
 		buildLayerManager: function () {
 			var v = $.view;
 			$.view.$manager = $('#manager');
 			// http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
 			// http://{s}.tile.osmosnimki.ru/kosmo/{z}/{x}/{y}.png
 			// http://{s}.tiles.mapbox.com/v3/karavanjo.map-opq7bhsy/{z}/{x}/{y}.png
-			this.addTileLayer('osm', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '© OpenStreetMap contributors');
+			this.addTileLayer(this.layersName.osm, 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '© OpenStreetMap contributors', 8, 18, 'osm');
+			this.addTileLayer(this.layersName.osm19, 'http://nextgis.ru/data/moscow-stops/Tiles/moscow-stops/{z}/{x}/{y}.png', '© OpenStreetMap contributors', 19, 19, 'osm');
 			this.addBingLayer('AujH--7B6FRTK8b81QgPhuvw_Sb3kc8hBO-Lp5OLNyhCD4ZQoGGW4cQS6zBgaeEh');
 			$.view.$tileLayers = v.$map.find('div.leaflet-tile-pane div.leaflet-layer');
 			this.bindLayerManagerEvents();
 			this.onLayer('osm');
+			this.manageOsmLayer();
 		},
 
 		bindLayerManagerEvents: function () {
@@ -30,16 +38,27 @@
 				context.onLayer();
 			});
 			$.view.$manager.find('div.tile-layers div.icon').off('click').on('click', function (e) {
-				context.onLayer($(this).data('layer'));
+				var layer = $(this).data('layer');
+				if (layer === context.layersName.osm) {
+					context.onLayer(layer);
+					context.manageOsmLayer();
+				} else {
+					context.onLayer(layer);
+				}
 			});
 		},
 
 		onLayer: function (nameLayer) {
-			var vm = $.viewmodel,
-				v = $.view,
+			var vm = $.viewmodel;
+			if (vm.currentTileLayer == nameLayer) return false;
+			var v = $.view,
 				$tileLayers = $($.viewmodel.map.getPanes().tilePane).find('div.leaflet-layer');
 			if (nameLayer) {
-				v.$body.removeClass(vm.currentTileLayer).addClass(nameLayer);
+				if (vm.currentTileLayer) {
+					v.$body.removeClass(this._layers[vm.currentTileLayer].css).addClass(this._layers[nameLayer].css);
+				} else {
+					v.$body.addClass(this._layers[nameLayer].css); // For initialization map
+				}
 				vm.currentTileLayer = nameLayer;
 				$tileLayers.hide().eq(this._layers[nameLayer].index).show();
 			} else {
@@ -47,23 +66,37 @@
 			}
 		},
 
-		addTileLayer: function (nameLayer, url, attribution) {
-			var layer = new L.TileLayer(url, {minZoom: 8, maxZoom: 18, attribution: attribution});
+		addTileLayer: function (nameLayer, url, attribution, minZoom, maxZoom, css) {
+			var layer = new L.TileLayer(url, {minZoom: minZoom, maxZoom: maxZoom, attribution: attribution});
 			this._layers[nameLayer] = {
 				'layer' : $.viewmodel.map.addLayer(layer, true),
-				'index' : this._lastIndex
+				'index' : this._lastIndex,
+				'css': css || nameLayer
 			};
-			this._lastIndex =+ 1;
+			this._lastIndex += 1;
 		},
 
 		addBingLayer: function (key) {
 			var bingLayer = new L.BingLayer(key, {minZoom: 8, maxZoom: 19});
 			this._layers['bing'] = {
 				'layer' : $.viewmodel.map.addLayer(bingLayer, true),
-				'index' : this._lastIndex
+				'index' : this._lastIndex,
+				'css': this.layersName.bing
 			};
-			this._lastIndex =+ 1;
-		}
+			this._lastIndex += 1;
+		},
 
+		manageOsmLayer: function () {
+			var vm = $.viewmodel,
+				layersName = this.layersName,
+				zoom = vm.map.getZoom();
+			if (zoom > 18 && vm.currentTileLayer === layersName.osm) {
+				this.onLayer(layersName.osm19);
+			}
+			if (zoom <= 18 && vm.currentTileLayer === layersName.osm19) {
+				this.onLayer(layersName.osm);
+			}
+			return true;
+		}
 	});
 })(jQuery);
