@@ -6,10 +6,10 @@
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width">
 
-##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/bootstrap.min.css')}">
-##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/tagsinput/jquery.tagsinput.css')}">
-##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/main.css')}">
-	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/build/sm.min.css')}" />
+	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/bootstrap.min.css')}">
+	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/tagsinput/jquery.tagsinput.css')}">
+	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/main.css')}">
+##	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/build/sm.min.css')}" />
 		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css"/>
 	<!--[if lte IE 8]>
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css"/>
@@ -29,23 +29,23 @@
 ##	<script src="${request.static_url('moscow_stops:static/js/Leaflet.markercluster/leaflet.markercluster-src.js')}"></script>
 
 	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/jquery/jquery.cookie.js')}"></script>
-	<script type="text/javascript" src="${request.static_url('moscow_stops:static/build/sm.min.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/tagsinput/jquery.tagsinput.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/jquery.imagesloaded.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/leaflet/bing.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/mustache.js')}"></script>
-####	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.templates.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.loader.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.helpers.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.common.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.helpers.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.manager.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.searcher.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.editor.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.osm.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.stops.js')}"></script>
-##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.user.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/build/sm.min.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/tagsinput/jquery.tagsinput.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/jquery.imagesloaded.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/leaflet/bing.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/mustache.js')}"></script>
+##	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.templates.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.loader.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.helpers.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.common.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.helpers.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.map.manager.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.searcher.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.editor.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.osm.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.stops.js')}"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/sm/sm.user.js')}"></script>
 	</head>
 <body class="searcher-collapsed loading">
 <div class="loading">
@@ -79,7 +79,8 @@ class="inner"
 		<button type="submit" class="btn btn-primary">Войти</button>
 	</form>
 	<form id="signOutForm" class="form-inline" method="post">
-		<div class="log"><span></span></div>
+		<div class="log" title="Статистика пользователей"><span></span></div>
+		<div class="export" title="Экспорт данных"><a href="${request.route_url('export')}"><span></span></a></div>
 		<fieldset>
 			<label id="display-name" class="control-label">
 				% if u_name:
