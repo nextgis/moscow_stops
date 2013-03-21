@@ -33,7 +33,8 @@ def _export_to_yandex_maps_for_Android(stops):
     file.close()
 
     zip = zipfile.ZipFile(file_dir + file_name + '.zip', 'w', zipfile.ZIP_DEFLATED)
-    zip.write(file_dir + file_name + '.xml')
+    zip.write(file_dir + file_name + '.xml', file_name + '.xml')
+    zip.close()
     os.remove(file_dir + file_name + '.xml')
 
     return file_name + '.zip'
