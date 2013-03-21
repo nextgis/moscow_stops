@@ -28,5 +28,6 @@ def main(global_config, **settings):
     config.add_route('stop_unblock', '/stop/unblock/{id}')
     config.add_route('logs', '/logs')
     config.add_route('export', '/export')
+    config.add_route('status_export', '/status-export/{id}')
     config.scan()
     return config.make_wsgi_app()

@@ -46,7 +46,7 @@ def get(context, request):
             clauses.append(Stop.geom.within(box_geom))
 
     stops_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y)\
-        .options(joinedload(Stop.stop_types), \
+        .options(joinedload(Stop.stop_types),
                  joinedload(Stop.check_status_type)) \
         .filter(*clauses) \
         .order_by(asc(Stop.is_block), asc(Stop.name))
@@ -81,8 +81,9 @@ def get_stop(context, request):
     session = DBSession()
     stop_from_db = session.query(Stop, Stop.geom.x, Stop.geom.y).options(joinedload(Stop.stop_types),
                                                                          joinedload(Stop.routes),
-                                                                         joinedload(Stop.user_block)).filter(
-        Stop.id == id).one()
+                                                                         joinedload(Stop.user_block))\
+                            .filter(Stop.id == id)\
+                            .one()
 
     stops_result = {'stop': {}}
     for col in stop_from_db[0].__table__.columns.keys():

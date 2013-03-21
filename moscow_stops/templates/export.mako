@@ -6,38 +6,48 @@
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width">
 
-		<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/bootstrap.min.css')}">
-		<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/tagsinput/jquery.tagsinput.css')}">
-		<link rel="stylesheet" href="${request.static_url('moscow_stops:static/css/main.css')}">
-##		<link rel="stylesheet" href="${request.static_url('moscow_stops:static/build/sm.min.css')}" />
-		</head>
+	<link rel="stylesheet" href="${request.static_url('moscow_stops:static/build/sm.min.css')}" />
+
+	<style type="text/css">
+		#status span {
+			color: #ff5d5a;
+		}
+
+		#status span,
+		#status a#file {
+			display: none;
+		}
+		#status.waiting span,
+		#status.finish a#file {
+			display: inline;
+		}
+	</style>
+
+	<script type="text/javascript">
+		document['url_root'] = '${request.route_url('home')}';
+	</script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script type="text/javascript" src="${request.static_url('moscow_stops:static/js/pages/export.js')}"></script>
+</head>
 <body style="text-align: center;">
 <h2>Экспорт данных</h2>
+
 <p>Выберите условия фильтрации данных:</p>
 
-<form style="width: 210px; margin: 0 auto; text-align: left;">
+<form id="export_form" style="width: 210px; margin: 0 auto; text-align: left;" method="POST">
 	<div class="control-group">
-		<label class="control-label" for="is_shelter">Крыша</label>
-		<select id="is_shelter" class="stand" name="is_shelter">
+		<label class="control-label" for="condition_check_type_1">Проверка на</br>местности</label>
+		<select id="condition_check_type_1" name="condition_check_type_1" class="stand">
 			<option value="None"></option>
-			<option value="true">Да</option>
-			<option value="false">Нет</option>
-		</select>
-	</div>
-	<div class="control-group">
-		<label class="control-label" for="is_bench">Скамейка</label>
-		<select id="is_bench" class="stand" name="is_bench">
-			<option value="None"></option>
-			<option value="true">Да</option>
-			<option value="false">Нет</option>
-		</select>
-	</div>
-	<div class="control-group">
-		<label class="control-label" for="is_check">Проверка на</br>местности</label>
-		<select id="is_check" name="is_check" class="stand">
-				% for check_type in check_types:
+			% for check_type in check_types:
 					<option value="${check_type.id}">${check_type.name}</option>
-				% endfor
+			% endfor
+		</select>
+		<select id="condition_check_type_2" name="condition_check_type_2" class="stand">
+			<option value="None"></option>
+			% for check_type in check_types:
+					<option value="${check_type.id}">${check_type.name}</option>
+			% endfor
 		</select>
 	</div>
 	<div class="control-group">
@@ -49,11 +59,14 @@
 	</div>
 	<div class="control-group" style="text-align: right;">
 		<div class="controls">
-			<button id="save" type="button" class="btn btn-success">Экспорт</button>
+			<button id="export" type="button" class="btn btn-success">Экспорт</button>
 		</div>
 	</div>
 </form>
-
+<div id="status">
+	<span>Файл создается...</span>
+	<a id="file">Скачать файл</a>
+</div>
 </body>
 </html>
 
