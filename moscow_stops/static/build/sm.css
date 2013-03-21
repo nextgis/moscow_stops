@@ -241,27 +241,48 @@ body.popup #popup {
 	float: right;
 }
 
-#signOutForm div.log {
+#signOutForm div.log,
+#signOutForm div.export {
 	width: 39px;
 	height: 39px;
 	position: absolute;
-	top: 0px;
-	left: -46px;
 	background-color: #ffffff;
 	border: 1px solid #afafaf;
 	cursor: pointer;
 }
 
-#signOutForm div.log span {
+#signOutForm div.log {
+	top: 0px;
+	left: -46px;
+}
+
+#signOutForm div.export {
+	top: 45px;
+	left: -46px;
+}
+
+#signOutForm div.log span,
+#signOutForm div.export span{
 	display: inline-block;
 	margin: 4px 0 0 5px;
 	width: 29px;
 	height: 31px;
+}
+
+#signOutForm div.log span {
 	background: url('../img/sm-icons.png') -30px -190px;
 }
 
 #signOutForm div.log:hover span {
 	background: url('../img/sm-icons.png') -58px -190px;
+}
+
+#signOutForm div.export span {
+	background: url('../img/sm-icons.png') -87px -190px;
+}
+
+#signOutForm div.export:hover span {
+	background: url('../img/sm-icons.png') -116px -190px;
 }
 
 #searchContainer .title,

@@ -1,4 +1,5 @@
 $(document).ready(function () {
+	$('#condition_check_type_1').prop('selectedIndex', 2);
 	$('#export').off('click').on('click', function () {
 		$('#status').attr('class', 'waiting');
 		var params = $('#export_form').serializeArray();
