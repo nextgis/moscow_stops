@@ -55,6 +55,7 @@
 		<select id="format" name="format" class="stand">
 			<option value="yma">Яндекс.Карты для Андроида</option>
 			<option value="xml_cat">XML categories</option>
+			<option value="csv">CSV</option>
 		</select>
 	</div>
 	<div class="control-group" style="text-align: right;">

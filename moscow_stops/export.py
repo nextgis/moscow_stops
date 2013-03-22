@@ -27,7 +27,8 @@ def export(request):
         session = DBSession()
         stops = session.query(Stop, Stop.geom.x, Stop.geom.y)\
             .options(joinedload(Stop.stop_types),
-                     joinedload(Stop.check_status_type)) \
+                     joinedload(Stop.check_status_type),
+                     joinedload(Stop.routes)) \
             .filter(*clauses) \
             .order_by(asc(Stop.name))
         file_name = exporter.export_stops(request.POST['format'], stops)

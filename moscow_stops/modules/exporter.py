@@ -43,7 +43,23 @@ def _export_to_yandex_maps_for_Android(stops):
 
 
 def _export_to_csv(stops):
-    return True
+    file_str = StringIO()
+    file_str.write(u'ID;Название;Автобусы;Троллейбусы;Трамваи\n'.encode('UTF-8'))
+
+    for stop in stops:
+        routes_by_type = {'0': [], '1': [], '2': []}
+        routes = stop[0].routes
+        for route in routes:
+            routes_by_type[str(route.route_type_id)].append(route.name.encode('UTF-8'))
+
+        csv_row = ';'.join([str(stop[0].id),
+                            stop[0].name.encode('UTF-8'),
+                            ','.join(routes_by_type['0']) if routes_by_type['0'] else '',
+                            ','.join(routes_by_type['1']) if routes_by_type['1'] else '',
+                            ','.join(routes_by_type['2']) if routes_by_type['2'] else ''])
+        file_str.write(csv_row + '\n')
+
+    return _create_zip(file_str, 'csv', 'csv')
 
 
 def _export_to_cxml(stops):
