@@ -7,8 +7,22 @@ import zipfile
 from time import gmtime, strftime
 import uuid
 
-import xml.etree.ElementTree as ET
 from pyramid.path import AssetResolver
+
+def _create_zip(stringIO, prefix, extension = 'xml'):
+    file_dir = AssetResolver('moscow_stops').resolve('static/export/').abspath()
+    file_name = prefix + '_' + strftime("%Y_%m_%d_%H_%M_%S_", gmtime()) + str(uuid.uuid1()).replace('-', '_')
+
+    output_file = open(file_dir + file_name + '.' + extension, 'w+')
+    output_file.write(stringIO.getvalue())
+    output_file.close()
+
+    zip_file = zipfile.ZipFile(file_dir + file_name + '.zip', 'w', zipfile.ZIP_DEFLATED)
+    zip_file.write(file_dir + file_name + '.' + extension, file_name + '.' + extension)
+    zip_file.close()
+    os.remove(file_dir + file_name + '.' + extension)
+
+    return file_name + '.zip'
 
 
 def _export_to_yandex_maps_for_Android(stops):
@@ -23,30 +37,34 @@ def _export_to_yandex_maps_for_Android(stops):
                      ']]></gml:description><gml:Point><gml:pos>' + str(stop[1])+ ' ' + str(stop[2]) + \
                      '</gml:pos></gml:Point><gml:metaDataProperty><AnyMetaData><CameraMetaData><directions><direction>55</direction><direction>235</direction></directions><speed>60</speed><kind>192</kind></CameraMetaData></AnyMetaData></gml:metaDataProperty></GeoObject>'
         file_str.write(geo_object)
-
     file_str.write(u'</gml:featureMembers></GeoObjectCollection></ymaps>')
 
-    file_dir = AssetResolver('moscow_stops').resolve('static/export/').abspath()
-    file_name = 'yma_' + strftime("%Y_%m_%d_%H_%M_%S_", gmtime()) + str(uuid.uuid1()).replace('-', '_')
-    file = open(file_dir + file_name + '.xml', 'w+')
-    file.write(file_str.getvalue())
-    file.close()
-
-    zip = zipfile.ZipFile(file_dir + file_name + '.zip', 'w', zipfile.ZIP_DEFLATED)
-    zip.write(file_dir + file_name + '.xml', file_name + '.xml')
-    zip.close()
-    os.remove(file_dir + file_name + '.xml')
-
-    return file_name + '.zip'
+    return _create_zip(file_str, 'yma')
 
 
 def _export_to_csv(stops):
     return True
 
 
+def _export_to_cxml(stops):
+    file_str = StringIO()
+    file_str.write(u'<?xml version="1.0" encoding="UTF-8"?>')
+    file_str.write(u'<categories><category name="Остановки">'.encode('UTF-8'))
+
+    for stop in stops:
+        name = stop[0].name.encode('UTF-8').replace('"', "'")
+        id = ' (%s)' % stop[0].id
+        geo_object = '<subcategory name="' + name + id + '"/>'
+        file_str.write(geo_object)
+    file_str.write(u'</category></categories>')
+
+    return _create_zip(file_str, 'xml_cat')
+
+
 _formats = {
     'yma': _export_to_yandex_maps_for_Android,
-    'csv': _export_to_csv
+    'csv': _export_to_csv,
+    'xml_cat': _export_to_cxml
 }
 
 

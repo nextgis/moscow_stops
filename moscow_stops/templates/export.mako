@@ -54,7 +54,7 @@
 		<label class="control-label" for="format">Формат экспорта:</label>
 		<select id="format" name="format" class="stand">
 			<option value="yma">Яндекс.Карты для Андроида</option>
-##			<option value="xml_cat">XML categories</option>
+			<option value="xml_cat">XML categories</option>
 		</select>
 	</div>
 	<div class="control-group" style="text-align: right;">
