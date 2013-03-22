@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import codecs
 from cStringIO import StringIO
 import zipfile
 
@@ -13,8 +14,8 @@ def _create_zip(stringIO, prefix, extension = 'xml'):
     file_dir = AssetResolver('moscow_stops').resolve('static/export/').abspath()
     file_name = prefix + '_' + strftime("%Y_%m_%d_%H_%M_%S_", gmtime()) + str(uuid.uuid1()).replace('-', '_')
 
-    output_file = open(file_dir + file_name + '.' + extension, 'w+')
-    output_file.write(stringIO.getvalue())
+    output_file = codecs.open(file_dir + file_name + '.' + extension, 'w+', 'utf-8-sig')
+    output_file.write(stringIO.getvalue().decode('utf-8-sig'))
     output_file.close()
 
     zip_file = zipfile.ZipFile(file_dir + file_name + '.zip', 'w', zipfile.ZIP_DEFLATED)
