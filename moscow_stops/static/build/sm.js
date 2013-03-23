@@ -1366,6 +1366,7 @@ $.fn.imagesLoaded = function( callback ) {
 				context.setLastExtent(map.getCenter(), map.getZoom());
 			});
 			$.view.$document.on('/sm/map/updateAllLayers', function () {
+				$.view.$document.trigger('/sm/map/validate');
 				$.view.$document.trigger('/sm/stops/updateStops');
 				$.view.$document.trigger('/sm/osm/updateOsmLayer');
 			});
@@ -1425,25 +1426,30 @@ $.fn.imagesLoaded = function( callback ) {
 
 (function ($) {
 	$.extend($.sm.map, {
-		getIcon: function (cssClass, iconSize) {
+		getIcon: function (cssClass, iconSize, innerHtml) {
 			return L.divIcon({
 				className: cssClass,
 				iconSize: [iconSize, iconSize],
 				iconAnchor: [iconSize / 2, iconSize / 2],
-				popupAnchor: [0, 2 - (iconSize / 2)]
+				popupAnchor: [0, 2 - (iconSize / 2)],
+				html: innerHtml
 			});
 		}
 	});
 })(jQuery);(function ($) {
+
 	$.extend($.viewmodel, {
 		currentTileLayer: null
 	});
+
 	$.extend($.view, {
 		$tileLayers: null,
-		$manager: null
+		$manager: null,
+		isLabelsButtonOn: false
 	});
 
 	$.extend($.sm.map, {
+
 		_layers: {},
 		_lastIndex: 0,
 
@@ -1453,9 +1459,11 @@ $.fn.imagesLoaded = function( callback ) {
 			bing: 'bing'
 		},
 
+
 		buildLayerManager: function () {
 			var v = $.view;
 			$.view.$manager = $('#manager');
+			this.buildLabelsButton();
 			// http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
 			// http://{s}.tile.osmosnimki.ru/kosmo/{z}/{x}/{y}.png
 			// http://{s}.tiles.mapbox.com/v3/karavanjo.map-opq7bhsy/{z}/{x}/{y}.png
@@ -1468,10 +1476,18 @@ $.fn.imagesLoaded = function( callback ) {
 			this.manageOsmLayer();
 		},
 
+
+		buildLabelsButton: function () {
+			$.view.$body.toggleClass('no-button-labels', $.viewmodel.map.getZoom() <= 15);
+		},
+
+
 		bindLayerManagerEvents: function () {
 			var context = this;
+
 			$.viewmodel.map.off('zoomend').on('zoomend', function () {
 				context.onLayer();
+				context.validateLabelsRendering();
 			});
 			$.view.$manager.find('div.tile-layers div.icon').off('click').on('click', function (e) {
 				var layer = $(this).data('layer');
@@ -1482,7 +1498,21 @@ $.fn.imagesLoaded = function( callback ) {
 					context.onLayer(layer);
 				}
 			});
+
+			$('#labelsButton').off('click').on('click', function (e) {
+				var viewmodel = $.viewmodel,
+					isRenderedLabels = !viewmodel.isRenderedLabels;
+				$.view.$body.toggleClass('labels', isRenderedLabels);
+				viewmodel.isRenderedLabels = isRenderedLabels;
+				viewmodel.isLabelsMode = !viewmodel.isLabelsMode;
+				$.view.$document.trigger('/sm/stops/updateStops');
+			});
+
+			$.view.$document.on('/sm/map/validate', function () {
+				context.validateLabelsRendering();
+			});
 		},
+
 
 		onLayer: function (nameLayer) {
 			var vm = $.viewmodel;
@@ -1502,6 +1532,7 @@ $.fn.imagesLoaded = function( callback ) {
 			}
 		},
 
+
 		addTileLayer: function (nameLayer, url, attribution, minZoom, maxZoom, css) {
 			var layer = new L.TileLayer(url, {minZoom: minZoom, maxZoom: maxZoom, attribution: attribution});
 			this._layers[nameLayer] = {
@@ -1512,6 +1543,7 @@ $.fn.imagesLoaded = function( callback ) {
 			this._lastIndex += 1;
 		},
 
+
 		addBingLayer: function (key) {
 			var bingLayer = new L.BingLayer(key, {minZoom: 8, maxZoom: 19});
 			this._layers['bing'] = {
@@ -1521,6 +1553,7 @@ $.fn.imagesLoaded = function( callback ) {
 			};
 			this._lastIndex += 1;
 		},
+
 
 		manageOsmLayer: function () {
 			var vm = $.viewmodel,
@@ -1533,6 +1566,15 @@ $.fn.imagesLoaded = function( callback ) {
 				this.onLayer(layersName.osm);
 			}
 			return true;
+		},
+
+
+		validateLabelsRendering: function () {
+			var isRenderedLabels = $.viewmodel.isRenderedLabels,
+				isLabelsButtonOn = $.view.isLabelsButtonOn,
+				zoom = $.viewmodel.map.getZoom();
+			this.buildLabelsButton();
+			$.viewmodel.isRenderedLabels = zoom >= 16;
 		}
 	});
 })(jQuery);(function ($) {
@@ -2180,7 +2222,9 @@ $.fn.imagesLoaded = function( callback ) {
 	$.extend($.viewmodel, {
 		stopSelected: null,
 		stopSelectedId: null,
-		stops: null
+		stops: null,
+		isRenderedLabels: false,
+		isLabelsMode: false
 	});
 	$.extend($.view, {
 
@@ -2245,24 +2289,25 @@ $.fn.imagesLoaded = function( callback ) {
 		},
 
 		renderStops: function (data) {
-			var mp = $.sm.map,
-				vm = $.viewmodel,
-				stopsLayer = vm.mapLayers.stops,
-				iconBlock = mp.getIcon('stop-block', 20),
-				iconEdit = mp.getIcon('stop-edit', 20),
-				iconCheck = mp.getIcon('stop-check', 20),
+			var map = $.sm.map,
+				viewmodel = $.viewmodel,
+				isRenderedLabels = viewmodel.isRenderedLabels, label,
+				stopsLayer = viewmodel.mapLayers.stops,
 				stopsIterable, stopsIterableLength, indexStop,
 				stop, marker, popupHtml,
 				htmlPopup = $.templates.stopPopupTemplate({ css: 'edit' }),
 				context = this;
 
-			vm.stops = data.stops;
+			viewmodel.stops = data.stops;
 
 			stopsIterable = data.stops.block.elements;
 			stopsIterableLength = data.stops.block.count;
 			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
 				stop = stopsIterable[indexStop];
-				marker = L.marker([stop.lat, stop.lon], {icon: iconBlock})
+				label = isRenderedLabels ?
+					'<div class="marker-label">' + stop.name + '</br>' + stop.id + '</div><div class="pointer"></div>' :
+					null;
+				marker = L.marker([stop.lat, stop.lon], {icon: map.getIcon('stop-block', 20, label)})
 					.on('click', function (e) {
 						var marker = e.target;
 						$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
@@ -2276,7 +2321,10 @@ $.fn.imagesLoaded = function( callback ) {
 			stopsIterableLength = data.stops.non_block.non_check.count;
 			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
 				stop = stopsIterable[indexStop];
-				marker = L.marker([stop.lat, stop.lon], {icon: iconEdit})
+				label = isRenderedLabels ?
+					'<div class="marker-label">' + stop.name + '</br>' + stop.id + '</div><div class="pointer"></div>' :
+					null;
+				marker = L.marker([stop.lat, stop.lon], {icon: map.getIcon('stop-edit', 20, label)})
 					.on('click', function (e) {
 						var marker = e.target;
 						$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
@@ -2291,7 +2339,10 @@ $.fn.imagesLoaded = function( callback ) {
 			stopsIterableLength = data.stops.non_block.check.count;
 			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
 				stop = stopsIterable[indexStop];
-				marker = L.marker([stop.lat, stop.lon], {icon: iconCheck}).on('click', function (e) {
+				label = isRenderedLabels ?
+					'<div class="marker-label">' + stop.name + '</br>' + stop.id + '</div><div class="pointer"></div>' :
+					null;
+				marker = L.marker([stop.lat, stop.lon], {icon: map.getIcon('stop-check', 20, label)}).on('click', function (e) {
 					var marker = e.target;
 					$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
 					context.buildStopPopup(marker.stop_id);

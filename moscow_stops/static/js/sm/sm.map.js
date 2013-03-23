@@ -25,6 +25,7 @@
 				context.setLastExtent(map.getCenter(), map.getZoom());
 			});
 			$.view.$document.on('/sm/map/updateAllLayers', function () {
+				$.view.$document.trigger('/sm/map/validate');
 				$.view.$document.trigger('/sm/stops/updateStops');
 				$.view.$document.trigger('/sm/osm/updateOsmLayer');
 			});

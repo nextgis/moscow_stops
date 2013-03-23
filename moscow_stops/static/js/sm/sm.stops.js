@@ -2,7 +2,9 @@
 	$.extend($.viewmodel, {
 		stopSelected: null,
 		stopSelectedId: null,
-		stops: null
+		stops: null,
+		isRenderedLabels: false,
+		isLabelsMode: false
 	});
 	$.extend($.view, {
 
@@ -67,24 +69,25 @@
 		},
 
 		renderStops: function (data) {
-			var mp = $.sm.map,
-				vm = $.viewmodel,
-				stopsLayer = vm.mapLayers.stops,
-				iconBlock = mp.getIcon('stop-block', 20),
-				iconEdit = mp.getIcon('stop-edit', 20),
-				iconCheck = mp.getIcon('stop-check', 20),
+			var map = $.sm.map,
+				viewmodel = $.viewmodel,
+				isRenderedLabels = viewmodel.isRenderedLabels, label,
+				stopsLayer = viewmodel.mapLayers.stops,
 				stopsIterable, stopsIterableLength, indexStop,
 				stop, marker, popupHtml,
 				htmlPopup = $.templates.stopPopupTemplate({ css: 'edit' }),
 				context = this;
 
-			vm.stops = data.stops;
+			viewmodel.stops = data.stops;
 
 			stopsIterable = data.stops.block.elements;
 			stopsIterableLength = data.stops.block.count;
 			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
 				stop = stopsIterable[indexStop];
-				marker = L.marker([stop.lat, stop.lon], {icon: iconBlock})
+				label = isRenderedLabels ?
+					'<div class="marker-label">' + stop.name + '</br>' + stop.id + '</div><div class="pointer"></div>' :
+					null;
+				marker = L.marker([stop.lat, stop.lon], {icon: map.getIcon('stop-block', 20, label)})
 					.on('click', function (e) {
 						var marker = e.target;
 						$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
@@ -98,7 +101,10 @@
 			stopsIterableLength = data.stops.non_block.non_check.count;
 			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
 				stop = stopsIterable[indexStop];
-				marker = L.marker([stop.lat, stop.lon], {icon: iconEdit})
+				label = isRenderedLabels ?
+					'<div class="marker-label">' + stop.name + '</br>' + stop.id + '</div><div class="pointer"></div>' :
+					null;
+				marker = L.marker([stop.lat, stop.lon], {icon: map.getIcon('stop-edit', 20, label)})
 					.on('click', function (e) {
 						var marker = e.target;
 						$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
@@ -113,7 +119,10 @@
 			stopsIterableLength = data.stops.non_block.check.count;
 			for (indexStop = 0; indexStop < stopsIterableLength; indexStop += 1) {
 				stop = stopsIterable[indexStop];
-				marker = L.marker([stop.lat, stop.lon], {icon: iconCheck}).on('click', function (e) {
+				label = isRenderedLabels ?
+					'<div class="marker-label">' + stop.name + '</br>' + stop.id + '</div><div class="pointer"></div>' :
+					null;
+				marker = L.marker([stop.lat, stop.lon], {icon: map.getIcon('stop-check', 20, label)}).on('click', function (e) {
 					var marker = e.target;
 					$.view.$document.trigger('/sm/map/openPopup', [marker.getLatLng(), htmlPopup]);
 					context.buildStopPopup(marker.stop_id);

@@ -1,13 +1,17 @@
 (function ($) {
+
 	$.extend($.viewmodel, {
 		currentTileLayer: null
 	});
+
 	$.extend($.view, {
 		$tileLayers: null,
-		$manager: null
+		$manager: null,
+		isLabelsButtonOn: false
 	});
 
 	$.extend($.sm.map, {
+
 		_layers: {},
 		_lastIndex: 0,
 
@@ -17,9 +21,11 @@
 			bing: 'bing'
 		},
 
+
 		buildLayerManager: function () {
 			var v = $.view;
 			$.view.$manager = $('#manager');
+			this.buildLabelsButton();
 			// http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
 			// http://{s}.tile.osmosnimki.ru/kosmo/{z}/{x}/{y}.png
 			// http://{s}.tiles.mapbox.com/v3/karavanjo.map-opq7bhsy/{z}/{x}/{y}.png
@@ -32,10 +38,18 @@
 			this.manageOsmLayer();
 		},
 
+
+		buildLabelsButton: function () {
+			$.view.$body.toggleClass('no-button-labels', $.viewmodel.map.getZoom() <= 15);
+		},
+
+
 		bindLayerManagerEvents: function () {
 			var context = this;
+
 			$.viewmodel.map.off('zoomend').on('zoomend', function () {
 				context.onLayer();
+				context.validateLabelsRendering();
 			});
 			$.view.$manager.find('div.tile-layers div.icon').off('click').on('click', function (e) {
 				var layer = $(this).data('layer');
@@ -46,7 +60,21 @@
 					context.onLayer(layer);
 				}
 			});
+
+			$('#labelsButton').off('click').on('click', function (e) {
+				var viewmodel = $.viewmodel,
+					isRenderedLabels = !viewmodel.isRenderedLabels;
+				$.view.$body.toggleClass('labels', isRenderedLabels);
+				viewmodel.isRenderedLabels = isRenderedLabels;
+				viewmodel.isLabelsMode = !viewmodel.isLabelsMode;
+				$.view.$document.trigger('/sm/stops/updateStops');
+			});
+
+			$.view.$document.on('/sm/map/validate', function () {
+				context.validateLabelsRendering();
+			});
 		},
+
 
 		onLayer: function (nameLayer) {
 			var vm = $.viewmodel;
@@ -66,6 +94,7 @@
 			}
 		},
 
+
 		addTileLayer: function (nameLayer, url, attribution, minZoom, maxZoom, css) {
 			var layer = new L.TileLayer(url, {minZoom: minZoom, maxZoom: maxZoom, attribution: attribution});
 			this._layers[nameLayer] = {
@@ -76,6 +105,7 @@
 			this._lastIndex += 1;
 		},
 
+
 		addBingLayer: function (key) {
 			var bingLayer = new L.BingLayer(key, {minZoom: 8, maxZoom: 19});
 			this._layers['bing'] = {
@@ -85,6 +115,7 @@
 			};
 			this._lastIndex += 1;
 		},
+
 
 		manageOsmLayer: function () {
 			var vm = $.viewmodel,
@@ -97,6 +128,15 @@
 				this.onLayer(layersName.osm);
 			}
 			return true;
+		},
+
+
+		validateLabelsRendering: function () {
+			var isRenderedLabels = $.viewmodel.isRenderedLabels,
+				isLabelsButtonOn = $.view.isLabelsButtonOn,
+				zoom = $.viewmodel.map.getZoom();
+			this.buildLabelsButton();
+			$.viewmodel.isRenderedLabels = zoom >= 16;
 		}
 	});
 })(jQuery);

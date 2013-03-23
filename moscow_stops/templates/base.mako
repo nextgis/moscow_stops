@@ -127,6 +127,11 @@ class="inner"
 			<button></button>
 		</div>
 	</div>
+	<div class="group vector-layers">
+		<div id="labelsButton" class="icon labels" title="Включить подписи">
+			<button></button>
+		</div>
+	</div>
 </div>
 <div id="editorContainer">
 	<span class="icon-collapse"></span>

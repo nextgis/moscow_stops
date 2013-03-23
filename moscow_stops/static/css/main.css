@@ -428,11 +428,24 @@ body.searcher-collapsed #manager {
 }
 
 #manager div.group {
-	width: 37px;
-	height: 70px;
 	border: 1px solid #AFAFAF;
 	border-radius: 4px 4px 4px 4px;
 	background-color: #F5F5F5;
+}
+
+#manager div.group.tile-layers {
+	width: 37px;
+	height: 70px;
+}
+
+#manager div.group.vector-layers {
+	width: 37px;
+	height: 36px;
+	margin-top: 10px;
+}
+
+body.no-button-labels div.group.vector-layers {
+	display: none;
 }
 
 #manager div.group div.icon {
@@ -456,13 +469,13 @@ body.searcher-collapsed #manager {
 	background: url('../img/sm-icons.png') -50px -35px;
 }
 
-#manager div.icon.bing button {
-	background: url('../img/sm-icons.png') -105px -35px;
-}
-
 body.osm #manager div.icon.osm button,
 #manager div.icon.osm:hover button {
 	background: url('../img/sm-icons.png') -77px -35px;
+}
+
+#manager div.icon.bing button {
+	background: url('../img/sm-icons.png') -105px -35px;
 }
 
 body.bing #manager div.icon.bing button,
@@ -470,8 +483,18 @@ body.bing #manager div.icon.bing button,
 	background: url('../img/sm-icons.png') -133px -35px;
 }
 
+#manager div.icon.labels button {
+	background: url('../img/sm-icons.png') -160px -35px;
+}
+
+body.labels #manager div.icon.labels button,
+#manager div.icon.labels:hover button {
+	background: url('../img/sm-icons.png') -189px -35px;
+}
+
 body.osm #manager div.icon.osm,
-body.bing #manager div.icon.bing {
+body.bing #manager div.icon.bing,
+body.labels #manager div.icon.labels {
 	border: 1px solid #838383;
 }
 
@@ -782,6 +805,7 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 
 #map .stop-edit:hover {
 	background: url('../img/sm-icons.png') -20px -145px;
+	z-index: 410 !important;
 }
 
 #map .stop-check {
@@ -791,6 +815,7 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 
 #map .stop-check:hover {
 	background: url('../img/sm-icons.png') -60px -145px;
+	z-index: 405 !important;
 }
 
 #map .stop-editable {
@@ -805,6 +830,51 @@ body.editor-collapsed #map .leaflet-control-container .leaflet-right {
 
 #map .stop-block:hover {
 	background: url('../img/sm-icons.png') -100px -145px;
+	z-index: 415 !important;
+}
+
+#map .marker-label {
+	width: 80px;
+	height: 23px;
+	background-color: white;
+	opacity: 0.7;
+	border: 1px solid #646262;
+	margin-top: -30px;
+	margin-left: -28px;
+	padding: 2px;
+	font-size: 11px;
+	font-weight: bold;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-align: center;
+	white-space: nowrap;
+	line-height: 11px;
+}
+
+#map .stop-edit:hover .marker-label,
+#map .stop-block:hover .marker-label,
+#map .stop-check:hover .marker-label {
+	opacity: 1;
+	width: auto;
+	overflow: visible;
+	display: table;
+	position: relative;
+}
+
+#map .stop-edit .pointer,
+#map .stop-block .pointer,
+#map .stop-check .pointer {
+	width: 13px;
+	height: 11px;
+	position: absolute;
+	left: 2px;
+	background: url('../img/sm-icons.png') -42px -23px;
+}
+
+#map .stop-edit:hover .pointer,
+#map .stop-block:hover .pointer,
+#map .stop-check:hover .pointer {
+	background: url('../img/sm-icons.png') -55px -23px;
 }
 
 #stop-popup.loader {
