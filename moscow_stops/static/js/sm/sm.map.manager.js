@@ -132,11 +132,9 @@
 
 
 		validateLabelsRendering: function () {
-			var isRenderedLabels = $.viewmodel.isRenderedLabels,
-				isLabelsButtonOn = $.view.isLabelsButtonOn,
-				zoom = $.viewmodel.map.getZoom();
+			var zoom = $.viewmodel.map.getZoom();
 			this.buildLabelsButton();
-			$.viewmodel.isRenderedLabels = zoom >= 16;
+			$.viewmodel.isRenderedLabels = zoom >= 16 && $.viewmodel.isLabelsMode;
 		}
 	});
 })(jQuery);
