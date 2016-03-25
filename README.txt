@@ -12,3 +12,6 @@ Getting Started
 
 - $venv/bin/pserve development.ini
 
+License
+-------------
+This program is licensed under GNU GPL v2 or any later version
